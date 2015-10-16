@@ -1,2 +1,2 @@
 # Smiles2Monomers
-A tool to rely chemical structures to biological structures
+A tool to link chemical structures to biological structures
