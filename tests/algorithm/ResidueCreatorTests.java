@@ -70,7 +70,7 @@ public class ResidueCreatorTests {
 				break;
 			}
 		
-		Entry<IAtom, Rule> entry = tyrN.getLinks().entrySet().iterator().next();
+		Entry<IAtom, Rule> entry = tyrN.getAtomicLinks().entrySet().iterator().next();
 		IAtom a = entry.getKey();
 		Assert.assertEquals(a.getSymbol(), "N");
 	}
@@ -97,7 +97,7 @@ public class ResidueCreatorTests {
 				break;
 			}
 		
-		Entry<IAtom, Rule> entry = tyrN.getLinks().entrySet().iterator().next();
+		Entry<IAtom, Rule> entry = tyrN.getAtomicLinks().entrySet().iterator().next();
 		IAtom a = entry.getKey();
 		Assert.assertEquals(a.getSymbol(), "N");
 	}

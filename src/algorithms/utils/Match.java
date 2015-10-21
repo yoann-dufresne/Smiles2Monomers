@@ -159,8 +159,8 @@ public class Match implements Comparable<Match> {
 		if (size != otherSize)
 			return otherSize - size;
 		
-		if (this.res.getLinks().size() != match.res.getLinks().size())
-			return this.res.getLinks().size() - match.res.getLinks().size();
+		if (this.res.getIdxLinks().size() != match.res.getIdxLinks().size())
+			return this.res.getIdxLinks().size() - match.res.getIdxLinks().size();
 		
 		return match.res.getWeight() - this.res.getWeight();
 	}

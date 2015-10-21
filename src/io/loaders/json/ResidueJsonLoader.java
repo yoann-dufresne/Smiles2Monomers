@@ -32,7 +32,8 @@ public class ResidueJsonLoader extends AbstractJsonLoader<FamilyDB, Family> {
 
 	@Override
 	protected Family objectFromJson(JSONObject obj) {
-		Residue res = Residue.constructResidue(
+		
+		Residue res = new Residue (
 				(String)obj.get("mono"),
 				(String)obj.get("smarts")
 		);
@@ -51,15 +52,16 @@ public class ResidueJsonLoader extends AbstractJsonLoader<FamilyDB, Family> {
 			}
 			
 			int idx = ((Number)jso.get("atom")).intValue();
-			IAtom a = res.getMolecule().getAtom(idx);
-			res.addLink(a, rule);
+			res.addIdxLink(idx, rule);
 		}
+		
 		
 		
 		// Family construction
 		Family fam = new Family();
 		try {
 			for (String name : ((String)obj.get("family")).split(",")) {
+				long time = System.nanoTime();
 				Monomer m = this.monos.getObject(name);
 				fam.addMonomer(m);
 			}
@@ -123,9 +125,9 @@ public class ResidueJsonLoader extends AbstractJsonLoader<FamilyDB, Family> {
 		String smiles = SmilesConverter.conv.mol2Smiles(mol, false);
 		List<IAtom> order = SmilesConverter.conv.getOrder();
 		
-		for (IAtom a : res.getLinks().keySet()) {
+		for (IAtom a : res.getAtomicLinks().keySet()) {
 			JSONObject jso = new JSONObject();
-			Rule rule = res.getLinks().get(a);
+			Rule rule = res.getAtomicLinks().get(a);
 			jso.put("name", rule.getName());
 			jso.put("atom", order.indexOf(a));
 			links.add(jso);
@@ -134,58 +136,5 @@ public class ResidueJsonLoader extends AbstractJsonLoader<FamilyDB, Family> {
 
 		return smiles;
 	}
-	
-	/*@SuppressWarnings("unchecked")
-	private void fillLinksJSO(JSONArray links, Residue res) {
-		IMolecule startMol = null;
-		try {
-			startMol = res.getMolecule().clone();
-		} catch (CloneNotSupportedException e) {
-			e.printStackTrace();
-		}
-		Map<IAtom, IAtom> conversion = new HashMap<>();
-		for (int i=0 ; i<startMol.getAtomCount() ; i++)
-			conversion.put(res.getMolecule().getAtom(i), startMol.getAtom(i));
-		AtomContainerManipulator.convertImplicitToExplicitHydrogens(startMol);
-		
-		// Canonise labels
-		//this.cl.canonLabel(startMol);
-		
-		for (IAtom startA : res.getLinks().keySet()) {
-			JSONObject jso = new JSONObject();
-			
-			Rule rule = res.getLinks().get(startA);
-			jso.put("name", rule.getName());
-			
-			IAtom newA = conversion.get(startA);
-			int idx = ((Long)newA.getProperty(InvPair.CANONICAL_LABEL)).intValue();
-			int modif = 1;
-			for (IAtom a : startMol.atoms()) {
-				int idxA = ((Long)a.getProperty(InvPair.CANONICAL_LABEL)).intValue();
-				//System.out.print(a.getSymbol() + ":" + idxA + " ");
-				if ("H".equals(a.getSymbol()) && idxA < idx)
-					modif++;
-			}
-			//System.out.println();
-			jso.put("atom", idx-modif);
-			
-			if (res.getName().equals("Tyr_pepN")) {
-				System.out.println(SmilesConverter.conv.mol2Smiles(startMol, true));
-				for (IAtom a : startMol.atoms())
-					System.out.print(a.getSymbol() + ":"
-					+ a.getProperty(InvPair.CANONICAL_LABEL) + ":"
-					+ a.getProperty(InvPair.INVARIANCE_PAIR) + " ");
-				System.out.println();
-				startMol = SmilesConverter.conv.transform(res.getSMILES());
-				for (IAtom a : startMol.atoms())
-					System.out.print(startMol.getAtomNumber(a) + ":" + a.getSymbol()  + " ");
-				System.out.println();
-				System.out.println(SmilesConverter.conv.mol2Smiles(startMol, false));
-				System.out.println();
-			}
-			
-			links.add(jso);
-		}
-	}*/
 
 }

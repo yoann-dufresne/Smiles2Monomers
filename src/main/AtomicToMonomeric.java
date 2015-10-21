@@ -83,7 +83,7 @@ public class AtomicToMonomeric {
 				idx++;
 				long time = System.currentTimeMillis();
 				ms.setAllowLightMatchs(lightMatch);
-				ms.calculateCoverage(pep);
+				ms.computeCoverage(pep);
 				Coverage cov = ms.getCoverage();
 				
 				cov.calculateGreedyCoverage();
@@ -146,27 +146,5 @@ public class AtomicToMonomeric {
 		
 		System.out.println("\n--- Program ended ---");
 	}
-	
-	/*private static void createJson (List<ChemicalObject> objs) {
-		try {
-			FileWriter fw = new FileWriter("data/surePeptides.json");
-			JSONArray array = new JSONArray();
-			for (ChemicalObject co : objs) {
-				JSONObject jso = new JSONObject();
-				String id = ""+co.getId();
-				for (int i=id.length() ; i<5 ; i++)
-					id = "0" + id;
-				id = "NOR" + id;
-				jso.put("id", id);
-				jso.put("name", co.getName());
-				jso.put("smiles", co.getSmiles());
-				array.add(jso);
-			}
-			fw.write(array.toJSONString());
-			fw.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}/**/
 	
 }

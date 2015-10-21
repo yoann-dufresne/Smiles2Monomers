@@ -24,30 +24,26 @@ public class ImagesGeneration {
 		return this.generatePeptidesImages(imgsDirectory, coverages);
 	}
 
-	private void generateMonomerImages(File imgsDirectory, MonomersDB monoDB) {
+	public void generateMonomerImages(File imgsDirectory, MonomersDB monoDB) {
 		// Monomer images directory
 		File monoImgsDirectory = new File(imgsDirectory.getPath() + "/monomers");
 		if (!monoImgsDirectory.exists())
 			monoImgsDirectory.mkdir();
-		for (File f : monoImgsDirectory.listFiles())
-			f.delete();
 		
 		// Monomers imgages generation.
 		PictureGenerator pg = new PictureGenerator();
 		
 		for (Monomer m : monoDB.getObjects()) {
 			File monoImg = new File(monoImgsDirectory.getPath() + "/" + m.getName() + ".png");
-			//monoImg = new File("/tmp/cpreomycin2A.png");
-			//m = new Monomer("", "", "C1CN=C(NC1C2C(=O)NCC(C(=O)NC(C(=O)NC(C(=O)NC(=CNC(=O)N)C(=O)N2)CN)CO)N)N");
-			pg.createPNG(
-					m.getMolecule(),
-					monoImg
-			);
-			//System.out.println();
+			if (!monoImg.exists())
+				pg.createPNG(
+						m.getMolecule(),
+						monoImg
+				);
 		}
 	}
 	
-	private Map<Coverage, ColorsMap> generatePeptidesImages(File imgsDirectory, List<Coverage> coverages) {
+	public Map<Coverage, ColorsMap> generatePeptidesImages(File imgsDirectory, Iterable<Coverage> coverages) {
 		// Coverage images directory
 		File coverageDir = new File(imgsDirectory.getPath() + "/peptides");
 		if (!coverageDir.exists())
@@ -59,6 +55,27 @@ public class ImagesGeneration {
 		
 		for (Coverage cov : coverages) {
 //			File png = new File(coverageDir.getPath() + "/" + cov.getChemicalObject().getId() + ".png");
+			String name = cov.getChemicalObject().getName().replaceAll("\\s", "_");
+			File png = new File(coverageDir.getPath() + "/" + cov.getChemicalObject().getId() + "_" + name + ".png");
+			ColorsMap colors = pg.createPNG(cov, png);
+			covsColors.put(cov, colors);
+		}
+	
+		return covsColors;
+	}
+
+	public Map<Coverage, ColorsMap> generatePeptidesImages(File imgsFolder, Coverage[] covs) {
+		// Coverage images directory
+		File coverageDir = new File(imgsFolder.getPath() + "/peptides");
+		if (!coverageDir.exists())
+			coverageDir.mkdir();
+		for (File f : coverageDir.listFiles())
+			f.delete();
+				
+		Map<Coverage, ColorsMap> covsColors = new HashMap<>();
+		
+		for (Coverage cov : covs) {
+//					File png = new File(coverageDir.getPath() + "/" + cov.getChemicalObject().getId() + ".png");
 			String name = cov.getChemicalObject().getName().replaceAll("\\s", "_");
 			File png = new File(coverageDir.getPath() + "/" + cov.getChemicalObject().getId() + "_" + name + ".png");
 			ColorsMap colors = pg.createPNG(cov, png);

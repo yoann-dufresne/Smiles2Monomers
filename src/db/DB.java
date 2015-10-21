@@ -55,10 +55,11 @@ public abstract class DB<T> {
 	}
 	
 	public T getObject (String id) throws NullPointerException {
-		if (this.database.containsKey(id))
-			return this.database.get(id);
+		T obj = this.database.get(id);
 		
-		throw new NullPointerException(id + " not seems to be loaded");
+		if (obj == null)
+			throw new NullPointerException(id + " not seems to be loaded");
+		return obj;
 	}
 	
 	public Set<String> getObjectNames () {

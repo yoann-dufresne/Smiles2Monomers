@@ -43,7 +43,7 @@ public class ContractedGraphTests {
 		
 		MonomericSpliting ms = new MonomericSpliting(families, chains, 2, 2, 3);
 		Polymer pol = peps.getObject("633");
-		ms.calculateCoverage(pol);
+		ms.computeCoverage(pol);
 		this.coverage = ms.getCoverage();
 		this.coverage.calculateGreedyCoverage();
 		

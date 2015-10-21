@@ -28,6 +28,8 @@ public class PreComputation {
 		String jsonResidues = "data/residues.json";
 		String jsonChains = "data/chains.json";
 		
+		int markovianSize = 3;
+		
 		// Parsing
 		for (int idx=0 ; idx<args.length ; idx++) {
 			if (args[idx].startsWith("-")) {
@@ -48,6 +50,9 @@ public class PreComputation {
 					jsonChains = args[idx+1];
 					break;
 				case "-serial":
+					serialFolder = args[idx+1];
+					break;
+				case "-markovian":
 					serialFolder = args[idx+1];
 					break;
 
@@ -122,7 +127,7 @@ public class PreComputation {
         	res.explicitToImplicitHydrogens();
         
         ChainLearning learning = new ChainLearning(learningBase);
-        learning.setMarkovianSize(3);
+        learning.setMarkovianSize(markovianSize);
         learning.learn(families);
 
         // --- Save ---

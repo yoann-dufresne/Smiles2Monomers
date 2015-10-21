@@ -49,7 +49,7 @@ public class GeneratePeptideImage {
 		
 		CoveragesDB cdb = new CoveragesDB();
 		for (Polymer pol : pepDB.getObjects()) {
-			ms.calculateCoverage(pol);
+			ms.computeCoverage(pol);
 			cdb.addObject(pol.getId(), ms.getCoverage());
 		}
 		

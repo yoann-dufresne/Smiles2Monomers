@@ -88,8 +88,8 @@ public class ResidueCreator {
 					}
 				}
 				
-				Map<IAtom, Rule> oldLinks = new HashMap<>(res.getLinks());
-				res.getLinks().clear();
+				Map<IAtom, Rule> oldLinks = new HashMap<>(res.getAtomicLinks());
+				res.getAtomicLinks().clear();
 				for (IAtom oldA : oldLinks.keySet()) {
 					Rule rule = oldLinks.get(oldA);
 					res.addLink(conversion.get(oldA), rule);
@@ -139,7 +139,7 @@ public class ResidueCreator {
 				}
 				for (Residue newRes : newResidues) {
 					family.addResidue(newRes);
-					if (family.containsMonomer(res.getMonoName()) && res.getLinks().size() > 0)
+					if (family.containsMonomer(res.getMonoName()) && res.getAtomicLinks().size() > 0)
 						family.addDependance(newRes, res);
 				}
 				res.setExplicitHydrogens(false);
@@ -236,7 +236,7 @@ public class ResidueCreator {
 			}
 			// Save links atoms
 			Map<IAtom, IAtom> convesionAtom = new HashMap<>();
-			for (IAtom a : res.getLinks().keySet()) {
+			for (IAtom a : res.getAtomicLinks().keySet()) {
 				int idx = oldMol.getAtomNumber(a);
 				IAtom newA = mol.getAtom(idx);
 				convesionAtom.put(a, newA);
@@ -275,7 +275,7 @@ public class ResidueCreator {
 					IAtom newA = convesionAtom.get(oldA);
 					//int oldIdx = oldMol.getAtomNumber(oldA);
 					//int newIdx = mol.getAtomNumber(newA);
-					residue.getLinks().put(newA, res.getLinks().get(oldA));
+					residue.getAtomicLinks().put(newA, res.getAtomicLinks().get(oldA));
 				}
 				// Add new Links
 				for (IAtom a : linkedAtoms)

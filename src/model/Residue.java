@@ -33,14 +33,15 @@ public class Residue extends AbstractChemicalObject implements Comparable<Residu
 	private int weight;
 	
 	private Map<IAtom, Rule> linkedAtoms;
+	private Map<Integer, Rule> idxLinkedAtoms;
 	
 	
-	private Residue (String monoName, String smiles) {
+	public Residue (String monoName, String smiles) {
 		this.smiles = smiles;
 		this.monoName = monoName;
 		this.name = this.monoName;
 		this.generateH = true;
-		this.linkedAtoms = new HashMap<>();
+		this.setIdx(Residue.currentIdx ++);
 	}
 	
 	public static boolean existingResidue (String smarts, String monoName) {
@@ -65,7 +66,6 @@ public class Residue extends AbstractChemicalObject implements Comparable<Residu
 		
 		if (res == null) {
 			res = new Residue(monoName, smarts);
-			res.setIdx(Residue.currentIdx ++);
 			
 			residues.add(res);
 			Residue.residueDirectory.put(smarts, residues);
@@ -110,9 +110,26 @@ public class Residue extends AbstractChemicalObject implements Comparable<Residu
 	}
 	
 	public void addLink (IAtom atom, Rule type) {
+		if (this.linkedAtoms == null)
+			this.linkedAtoms = new HashMap<>();
+		
 		this.linkedAtoms.put(atom, type);
 		
-		if (this.getLinks().values().contains(type) && type.getWeights().length > 1)
+		if (this.getAtomicLinks().values().contains(type) && type.getWeights().length > 1)
+			this.weight = this.weight + type.getWeights()[1];
+		else
+			this.weight = this.weight + type.getWeights()[0];
+		
+		this.changeName();
+	}
+	
+	public void addIdxLink (int idx, Rule type) {
+		if (this.idxLinkedAtoms == null)
+			this.idxLinkedAtoms = new HashMap<>();
+		
+		this.idxLinkedAtoms.put(idx, type);
+		
+		if (this.getIdxLinks().values().contains(type) && type.getWeights().length > 1)
 			this.weight = this.weight + type.getWeights()[1];
 		else
 			this.weight = this.weight + type.getWeights()[0];
@@ -122,14 +139,34 @@ public class Residue extends AbstractChemicalObject implements Comparable<Residu
 	
 	private void changeName() {
 		this.name = this.monoName;
-		List<Rule> links = new ArrayList<>(this.linkedAtoms.values());
+		List<Rule> links = new ArrayList<>(this.getIdxLinks().values());
 		Collections.sort(links);
 		for (Rule r : links)
 			this.name += "_" + r.getName();
 	}
 
-	public Map<IAtom, Rule> getLinks() {
+	public Map<IAtom, Rule> getAtomicLinks() {
+		if (this.linkedAtoms == null) {
+			this.linkedAtoms = new HashMap<>();
+			for (Integer idx : this.idxLinkedAtoms.keySet()) {
+				IAtom a = this.getMolecule().getAtom(idx);
+				this.linkedAtoms.put(a, this.idxLinkedAtoms.get(idx));
+			}
+		}
+		
 		return this.linkedAtoms;
+	}
+	
+	public Map<Integer, Rule> getIdxLinks() {
+		if (this.idxLinkedAtoms == null) {
+			this.idxLinkedAtoms = new HashMap<>();
+			for (IAtom a : this.linkedAtoms.keySet()) {
+				int idx = this.getMolecule().getAtomNumber(a);
+				this.idxLinkedAtoms.put(idx, this.linkedAtoms.get(idx));
+			}
+		}
+		
+		return this.idxLinkedAtoms;
 	}
 
 	public void setMol(Molecule mol) {
@@ -153,16 +190,7 @@ public class Residue extends AbstractChemicalObject implements Comparable<Residu
 
 	@Override
 	public int compareTo(Residue res) {
-		//if (Residue.alphabetic) {
-			return this.name.compareTo(res.name);
-		/*} else {
-			if (this.getSize() != res.getSize())
-				return res.getSize() - this.getSize();
-			else if (this.getLinks().size() != res.getLinks().size())
-				return this.links.size() - res.links.size();
-			else
-				return res.getWeight() - this.getWeight();
-		}*/
+		return this.name.compareTo(res.name);
 	}
 	
 	public String getId() {
@@ -172,10 +200,6 @@ public class Residue extends AbstractChemicalObject implements Comparable<Residu
 	public void setIdx(int idx) {
 		this.idx = idx;
 	}
-	
-	/*public static void setAlphabeticSort (boolean alphabetic) {
-		Residue.alphabetic = alphabetic;
-	}*/
 
 	@Override
 	public MonomerGraph getGraph() {

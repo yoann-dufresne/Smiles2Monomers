@@ -1,7 +1,5 @@
 package io.loaders.json;
 
-import io.loaders.AbstractLoader;
-
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -14,6 +12,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
 import db.DB;
+import io.loaders.AbstractLoader;
 
 public abstract class AbstractJsonLoader<B extends DB<T>, T> extends AbstractLoader<B, T> {
 	
@@ -59,6 +58,26 @@ public abstract class AbstractJsonLoader<B extends DB<T>, T> extends AbstractLoa
 	public void saveFile (B db, String filename) {
 		JSONArray array = new JSONArray();
 		for (T obj : db.getObjects())
+			array.addAll(this.getArrayOfElements(obj));
+		
+		File f = new File(filename);
+		try {
+			FileWriter fw = new FileWriter(f);
+			BufferedWriter bw = new BufferedWriter(fw);
+			
+			String json = array.toJSONString();
+			bw.write(json);
+			
+			bw.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	@SuppressWarnings("unchecked")
+	public void saveFile(T[] covs, String filename) {
+		JSONArray array = new JSONArray();
+		for (T obj : covs)
 			array.addAll(this.getArrayOfElements(obj));
 		
 		File f = new File(filename);

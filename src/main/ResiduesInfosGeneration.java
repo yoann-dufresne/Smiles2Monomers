@@ -29,7 +29,7 @@ public class ResiduesInfosGeneration {
 			sb.append("Num of residues : " + fam.getResidues().size() + "\n");
 			sb.append("Root residues (with max links) :" + "\n");
 			for (Residue res : fam.getRoots())
-				sb.append("\t" + res.getName() + " : " + res.getLinks().size() + "\n");
+				sb.append("\t" + res.getName() + " : " + res.getAtomicLinks().size() + "\n");
 			sb.append("\n");
 		}
 		

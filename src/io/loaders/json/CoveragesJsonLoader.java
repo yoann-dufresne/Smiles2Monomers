@@ -33,6 +33,7 @@ public class CoveragesJsonLoader extends
 	protected CoveragesDB createDB() {
 		return new CoveragesDB();
 	}
+	
 
 	@Override
 	protected Coverage objectFromJson(JSONObject obj) {

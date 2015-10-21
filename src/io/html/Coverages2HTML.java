@@ -1,18 +1,18 @@
 package io.html;
 
-import io.imgs.PictureCoverageGenerator.ColorsMap;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import algorithms.utils.Coverage;
 import db.FamilyDB;
 import db.MonomersDB;
+import io.imgs.PictureCoverageGenerator.ColorsMap;
 
 public class Coverages2HTML {
 	
@@ -26,8 +26,16 @@ public class Coverages2HTML {
 		this.familiesDB = famDB;
 	}
 	
+	public Coverages2HTML(Coverage[] covs, MonomersDB db, FamilyDB famDB) {
+		List<Coverage> coverages = new ArrayList<>();
+		for (Coverage cov : covs)
+			coverages.add(cov);
+		this.coverages = coverages;
+		this.monoDB = db;
+		this.familiesDB = famDB;
+	}
+
 	public void createResults (File resultFile, File imgs, Map<Coverage, ColorsMap> allColors) {
-//		File resultImgs = new File(resultFile.getPath() + "/imgs");
 		String resultDir = resultFile.getParent();
 		File resultImgs = new File(resultDir + "/imgs");
 		this.copyDirectory(imgs, resultImgs);

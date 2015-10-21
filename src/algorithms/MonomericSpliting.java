@@ -16,6 +16,7 @@ import algorithms.isomorphism.indepth.RemoveStrategy;
 import algorithms.utils.Coverage;
 import algorithms.utils.Match;
 import db.FamilyDB;
+import db.PolymersDB;
 import model.Family;
 import model.OtherChemicalObject;
 import model.Polymer;
@@ -44,12 +45,25 @@ public class MonomericSpliting {
 		this.modulation = new Modulation(modulationDepth);
 		this.retry = retryCount;
 	}
+	
+	public Coverage[] computeCoverages (PolymersDB polDB) {
+		Coverage[] covs = new Coverage[polDB.size()];
+		
+		int idx=0;
+		for (Polymer pol : polDB.getObjects()) {
+			this.computeCoverage(pol);
+			covs[idx] = this.getCoverage();
+			idx += 1;
+		}
+		
+		return covs;
+	}
 
 	/**
 	 * Calculate an object Coverage with all matches from families. 
 	 * @param pep Peptide to match
 	 */
-	public void calculateCoverage(Polymer pep) {
+	public void computeCoverage(Polymer pep) {
 		this.coverage = new Coverage(pep);
 		this.matcher.setChemicalObject(pep);
 		Isomorphism.setMappingStorage(true);

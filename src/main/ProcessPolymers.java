@@ -1,17 +1,26 @@
 package main;
 
+import java.io.File;
+import java.util.Map;
+
 import algorithms.MonomericSpliting;
 import algorithms.isomorphism.chains.ChainsDB;
-import db.CoveragesDB;
+import algorithms.utils.Coverage;
 import db.FamilyDB;
 import db.MonomersDB;
 import db.PolymersDB;
 import db.RulesDB;
+import io.html.Coverages2HTML;
+import io.imgs.ImagesGeneration;
+import io.imgs.PictureCoverageGenerator.ColorsMap;
+import io.loaders.json.CoveragesJsonLoader;
 import io.loaders.json.FamilyChainIO;
 import io.loaders.json.MonomersJsonLoader;
 import io.loaders.json.PolymersJsonLoader;
 import io.loaders.json.ResidueJsonLoader;
 import io.loaders.json.RulesJsonLoader;
+import io.loaders.serialization.MonomersSerialization;
+import io.zip.OutputZiper;
 
 public class ProcessPolymers {
 
@@ -22,7 +31,12 @@ public class ProcessPolymers {
 		String rulesDBname = "data/rules.json";
 		String residuesDBname = "data/residues.json";
 		String chainsDBFile = "data/chains.json";
+		
 		String outfile = "results/coverages.json";
+		String outfolder = "results/";
+		String imgsFoldername = "images/";
+		boolean html = false;
+		boolean zip = false;
 		
 		String serialFolder = "data/serials/";
 		
@@ -55,11 +69,26 @@ public class ProcessPolymers {
 				case "-serial":
 					serialFolder = args[idx+1];
 					break;
+				case "-outfile":
+					outfile = args[idx+1];
+					break;
+				case "-outfolder":
+					outfolder = args[idx+1];
+					break;
+				case "-imgs":
+					imgsFoldername = args[idx+1];
+					break;
 				case "-strict":
 					lightMatch = false;
 					continue loop;
 				case "-v":
 					verbose = true;
+					continue loop;
+				case "-html":
+					html = true;
+					continue loop;
+				case "-zip":
+					zip = true;
 					continue loop;
 
 				default:
@@ -80,21 +109,74 @@ public class ProcessPolymers {
 		System.out.println("--- Loading ---");
 		// Maybe loading can be faster for the learning base, using serialized molecules instead of CDK SMILES parsing method.
 		long loadingTime = System.currentTimeMillis();
-		MonomersDB monoDB = new MonomersJsonLoader().loadFile(monoDBname);
-		PolymersJsonLoader pjl = new PolymersJsonLoader(monoDB);
-		PolymersDB pepDB = pjl.loadFile(pepDBname);
+		MonomersDB monoDB = new MonomersJsonLoader(false).loadFile(monoDBname);
+		MonomersSerialization ms = new MonomersSerialization();
+		ms.deserialize(monoDB, serialFolder + "monos.serial");
+		
+		boolean d2 = html || zip;
+		PolymersJsonLoader pjl = new PolymersJsonLoader(monoDB, d2);
+		PolymersDB polDB = pjl.loadFile(pepDBname);
+		
 		RulesDB rulesDB = RulesJsonLoader.loader.loadFile(rulesDBname);
+		
 		ResidueJsonLoader rjl = new ResidueJsonLoader(rulesDB, monoDB);
-		FamilyDB families = rjl.loadFile(residuesDBname);
+		
+		FamilyDB families = rjl.loadFile(residuesDBname); // Need optimizations
 		FamilyChainIO fcio = new FamilyChainIO(families);
 		ChainsDB chains = fcio.loadFile(chainsDBFile);
 		
-		// Create monomer splits
-		CoveragesDB coverages = new CoveragesDB();
+		loadingTime = System.currentTimeMillis() - loadingTime;
+		System.out.println("Loading time : " + (loadingTime/1000) + "s");
+		
+		
+		
+		//------------------- Spliting ------------------------
+		System.out.println("--- Monomers search ---");
+		long searchTime = System.currentTimeMillis();
 
 		MonomericSpliting.setVerbose(verbose);
-		MonomericSpliting ms = new MonomericSpliting(families, chains, removeDistance, retryCount, modulationDepth);
-		loadingTime = System.currentTimeMillis() - loadingTime;
+		MonomericSpliting split = new MonomericSpliting(families, chains, removeDistance, retryCount, modulationDepth);
+		Coverage[] covs = split.computeCoverages(polDB);
+		
+		searchTime = System.currentTimeMillis() - searchTime;
+		System.out.println("Search time : " + (searchTime/1000) + "s");
+		
+		
+		
+		//------------------- Output ------------------------
+		System.out.println("--- Output creations ---");
+		long outputTime = System.currentTimeMillis();
+		CoveragesJsonLoader cjl = new CoveragesJsonLoader(polDB, families);
+		cjl.saveFile(covs, outfile);
+		
+		// Images generation
+		if (html || zip) {
+			File imgsFolder = new File(imgsFoldername);
+			if (!imgsFolder.exists())
+				imgsFolder.mkdir();
+			
+			ImagesGeneration ig = new ImagesGeneration();
+			ig.generateMonomerImages(imgsFolder, monoDB);
+			
+			Map<Coverage, ColorsMap> colors = ig.generatePeptidesImages(imgsFolder, covs);
+			
+			if (html) {
+				// HTML
+				Coverages2HTML c2h = new Coverages2HTML(covs, monoDB, families);
+				File htmlFile  = new File(outfolder + "s2m.html");
+				c2h.createResults(htmlFile, imgsFolder, colors);
+			}
+			
+			if (zip) {
+				// Zip File
+				OutputZiper oz = new OutputZiper(outfolder + "s2m.zip");
+				oz.createZip(imgsFolder.getPath(), outfile, pepDBname, monoDBname, residuesDBname, colors);
+			}
+		}
+			
+		
+		outputTime = System.currentTimeMillis() - outputTime;
+		System.out.println("Ouputing time : " + (outputTime/1000) + "s");
 	}
 
 }
