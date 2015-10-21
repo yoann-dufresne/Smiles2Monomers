@@ -13,6 +13,7 @@ import io.loaders.json.MonomersJsonLoader;
 import io.loaders.json.PolymersJsonLoader;
 import io.loaders.json.ResidueJsonLoader;
 import io.loaders.json.RulesJsonLoader;
+import io.loaders.serialization.MonomersSerialization;
 import model.Residue;
 
 public class PreComputation {
@@ -23,6 +24,7 @@ public class PreComputation {
 		String monosDBName = "data/monomers.json";
 		String jsonPolymers = "data/peptides.json";
 		
+		String serialFolder = "data/serials/";
 		String jsonResidues = "data/residues.json";
 		String jsonChains = "data/chains.json";
 		
@@ -44,6 +46,9 @@ public class PreComputation {
 					break;
 				case "-cha":
 					jsonChains = args[idx+1];
+					break;
+				case "-serial":
+					serialFolder = args[idx+1];
 					break;
 
 				default:
@@ -77,12 +82,27 @@ public class PreComputation {
 		}
 		
 		
-		//----------------- residues --------------------------
-        System.out.println("--- Loading ---");
+		//------------------- Loadings ------------------------
+		
+		System.out.println("--- Loading ---");
         RulesDB rules = RulesJsonLoader.loader.loadFile(rulesDBName);
-        MonomersDB monos = new MonomersJsonLoader().loadFile(monosDBName);
-        PolymersJsonLoader pjl = new PolymersJsonLoader(monos);
+        MonomersDB monos = new MonomersJsonLoader(true).loadFile(monosDBName);
+        PolymersJsonLoader pjl = new PolymersJsonLoader(monos, false);
         PolymersDB learningBase = pjl.loadFile(jsonPolymers);
+        
+		
+		//----------------- Serializations --------------------
+		
+        System.out.println("--- Data serialisation ---");
+        File folder = new File(serialFolder);
+        if (!folder.exists())
+        	folder.mkdir();
+        	
+        MonomersSerialization ms = new MonomersSerialization();
+        ms.serialize(monos, serialFolder + "monos.serial");
+        
+		
+		//----------------- residues --------------------------
         
         ResidueCreator rc = new ResidueCreator(rules);
         rc.setVerbose(false);

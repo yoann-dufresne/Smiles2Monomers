@@ -9,6 +9,10 @@ import org.openscience.cdk.exception.InvalidSmilesException;
 
 public class Polymer extends AbstractChemicalObject {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 2520532051216140680L;
 	private static boolean computeCoordinates;
 	// Peptides informations
 	private int id_peptide;

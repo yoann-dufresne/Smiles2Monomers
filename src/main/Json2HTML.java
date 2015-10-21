@@ -8,6 +8,7 @@ import io.loaders.json.MonomersJsonLoader;
 import io.loaders.json.PolymersJsonLoader;
 import io.loaders.json.ResidueJsonLoader;
 import io.loaders.json.RulesJsonLoader;
+import io.loaders.serialization.MonomersSerialization;
 import io.zip.OutputZiper;
 
 import java.io.File;
@@ -51,7 +52,10 @@ public class Json2HTML {
 		System.out.println("--- Loading ---");
 		// Maybe loading can be faster for the learning base, using serialized molecules instead of CDK SMILES parsing method.
 		long loadingTime = System.currentTimeMillis();
-		MonomersDB monoDB = new MonomersJsonLoader(true).loadFile(monoDBname);
+		MonomersDB monoDB = new MonomersJsonLoader(false).loadFile(monoDBname);
+		MonomersSerialization ms = new MonomersSerialization();
+        ms.deserialize(monoDB, "data/serials/monos.serial");
+        
 		PolymersJsonLoader pcl = new PolymersJsonLoader(monoDB, true);
 		PolymersDB pepDB = pcl.loadFile(pepDBname);
 		RulesDB rules = RulesJsonLoader.loader.loadFile(rulesDBname);
