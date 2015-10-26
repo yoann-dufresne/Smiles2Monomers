@@ -118,7 +118,7 @@ public class ResidueCreator {
 		} catch (CloneNotSupportedException e1) {
 			e1.printStackTrace();
 		}
-		searchResidues.add(Residue.constructResidue(mono.getCode(), this.sg.createSMILES(m)));
+		searchResidues.add(new Residue(mono.getCode(), this.sg.createSMILES(m), true));
 		
 		
 		boolean firstTime = true;

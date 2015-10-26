@@ -36,12 +36,17 @@ public class Residue extends AbstractChemicalObject implements Comparable<Residu
 	private Map<Integer, Rule> idxLinkedAtoms;
 	
 	
-	public Residue (String monoName, String smiles) {
+	private Residue (String monoName, String smiles) {
 		this.smiles = smiles;
 		this.monoName = monoName;
 		this.name = this.monoName;
 		this.generateH = true;
 		this.setIdx(Residue.currentIdx ++);
+	}
+	
+	public Residue (String monoName, String smiles, boolean createLinksMap) {
+		this(monoName, smiles);
+		this.idxLinkedAtoms = new HashMap<>();
 	}
 	
 	public static boolean existingResidue (String smarts, String monoName) {
@@ -112,6 +117,7 @@ public class Residue extends AbstractChemicalObject implements Comparable<Residu
 	public void addLink (IAtom atom, Rule type) {
 		if (this.linkedAtoms == null)
 			this.linkedAtoms = new HashMap<>();
+		//this.idxLinkedAtoms = null;
 		
 		this.linkedAtoms.put(atom, type);
 		
@@ -126,6 +132,7 @@ public class Residue extends AbstractChemicalObject implements Comparable<Residu
 	public void addIdxLink (int idx, Rule type) {
 		if (this.idxLinkedAtoms == null)
 			this.idxLinkedAtoms = new HashMap<>();
+		//this.linkedAtoms = null;
 		
 		this.idxLinkedAtoms.put(idx, type);
 		
@@ -148,10 +155,12 @@ public class Residue extends AbstractChemicalObject implements Comparable<Residu
 	public Map<IAtom, Rule> getAtomicLinks() {
 		if (this.linkedAtoms == null) {
 			this.linkedAtoms = new HashMap<>();
-			for (Integer idx : this.idxLinkedAtoms.keySet()) {
-				IAtom a = this.getMolecule().getAtom(idx);
-				this.linkedAtoms.put(a, this.idxLinkedAtoms.get(idx));
-			}
+			
+			if (this.idxLinkedAtoms != null)
+				for (Integer idx : this.idxLinkedAtoms.keySet()) {
+					IAtom a = this.getMolecule().getAtom(idx);
+					this.linkedAtoms.put(a, this.idxLinkedAtoms.get(idx));
+				}
 		}
 		
 		return this.linkedAtoms;
@@ -162,7 +171,7 @@ public class Residue extends AbstractChemicalObject implements Comparable<Residu
 			this.idxLinkedAtoms = new HashMap<>();
 			for (IAtom a : this.linkedAtoms.keySet()) {
 				int idx = this.getMolecule().getAtomNumber(a);
-				this.idxLinkedAtoms.put(idx, this.linkedAtoms.get(idx));
+				this.idxLinkedAtoms.put(idx, this.linkedAtoms.get(a));
 			}
 		}
 		

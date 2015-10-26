@@ -136,6 +136,7 @@ public class ProcessPolymers {
 
 		MonomericSpliting.setVerbose(verbose);
 		MonomericSpliting split = new MonomericSpliting(families, chains, removeDistance, retryCount, modulationDepth);
+		split.setAllowLightMatchs(lightMatch);
 		Coverage[] covs = split.computeCoverages(polDB);
 		
 		searchTime = System.currentTimeMillis() - searchTime;
