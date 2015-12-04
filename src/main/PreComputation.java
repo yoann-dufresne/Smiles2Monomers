@@ -53,7 +53,7 @@ public class PreComputation {
 					serialFolder = args[idx+1];
 					break;
 				case "-markovian":
-					serialFolder = args[idx+1];
+					markovianSize = new Integer(args[idx+1]);
 					break;
 
 				default:

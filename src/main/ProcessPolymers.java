@@ -164,13 +164,13 @@ public class ProcessPolymers {
 			if (html) {
 				// HTML
 				Coverages2HTML c2h = new Coverages2HTML(covs, monoDB, families);
-				File htmlFile  = new File(outfolder + "s2m.html");
+				File htmlFile  = new File(outfolder + "/s2m.html");
 				c2h.createResults(htmlFile, imgsFolder, colors);
 			}
 			
 			if (zip) {
 				// Zip File
-				OutputZiper oz = new OutputZiper(outfolder + "s2m.zip");
+				OutputZiper oz = new OutputZiper(outfolder + "/s2m.zip");
 				oz.createZip(imgsFolder.getPath(), outfile, pepDBname, monoDBname, residuesDBname, colors);
 			}
 		}

@@ -35,7 +35,8 @@ public class ResidueJsonLoader extends AbstractJsonLoader<FamilyDB, Family> {
 		
 		Residue res = new Residue (
 				(String)obj.get("mono"),
-				(String)obj.get("smarts")
+				(String)obj.get("smarts"),
+				true
 		);
 		res.setIdx(((Number)obj.get("id")).intValue());
 		
@@ -61,7 +62,6 @@ public class ResidueJsonLoader extends AbstractJsonLoader<FamilyDB, Family> {
 		Family fam = new Family();
 		try {
 			for (String name : ((String)obj.get("family")).split(",")) {
-				long time = System.nanoTime();
 				Monomer m = this.monos.getObject(name);
 				fam.addMonomer(m);
 			}

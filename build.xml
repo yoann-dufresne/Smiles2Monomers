@@ -1,196 +1,203 @@
-<?xml version="1.0" encoding="UTF-8" ?> 
+<?xml version="1.0" encoding="UTF-8" ?>
 
 <project name="Smiles2Monomers" default="compile" basedir=".">
-  
-  <property name="lib.home"     value="${basedir}/lib"/>
-  <property name="build.home"   value="${basedir}/build"/>
-  <property name="src.home"     value="${basedir}/src"/>
-  <property name="tests.home"   value="${basedir}/tests"/>
-  <property name="reports.home" value="${build.home}/reports"/>
 
-  <!--property name="exec.monomers" value="data/monomers.json"/>
-  <property name="exec.peptides" value="data/peptides.json"/>
-  <property name="exec.rules" value="data/rules.json"/-->
-  <property name="exec.residues" value="data/residues.json"/>
-  <property name="exec.chains" value="data/chains.json"/>
-  <property name="jarfile" value="${build.home}/s2m.jar"/>
+	<property name="lib.home"     value="${basedir}/lib"/>
+	<property name="build.home"   value="${basedir}/build"/>
+	<property name="src.home"     value="${basedir}/src"/>
+	<property name="tests.home"   value="${basedir}/tests"/>
+	<property name="reports.home" value="${build.home}/reports"/>
+
+	<property name="exec.monomers" value="data/monomers.json"/>
+	<property name="exec.peptides" value="data/peptides.json"/>
+	<property name="exec.rules" value="data/rules.json"/>
+	<property name="exec.residues" value="data/residues.json"/>
+	<property name="exec.chains" value="data/chains.json"/>
+	<property name="jarfile" value="${build.home}/s2m.jar"/>
+
+	<property name="exec.blocSize" value="4"/>
 	
-  <property name="exec.blocSize" value="4"/>
+	<property name="exec.outfolder" value="${build.home}/results" />
 
-  <path id="compile.classpath">
-    <fileset dir="${build.home}/lib"><include name="*.jar"/></fileset>
-  </path>
+	<path id="compile.classpath">
+		<fileset dir="${build.home}/lib">
+			<include name="*.jar"/>
+		</fileset>
+	</path>
 
-  <path id="exec.classpath">
-    <fileset dir="${build.home}/lib"><include name="*.jar"/></fileset>
-    <fileset dir="${build.home}"><include name="s2m.jar"/></fileset>
-  </path>
-  
-  
-  
-  <target name="clean" description="Delete old build and dist directories">
-    <delete dir="${build.home}"/>
-  </target>
-  
-  
-  
-  <target name="prepare" depends="clean"> 
-    <mkdir  dir="${build.home}"/>
-    <mkdir  dir="${build.home}/classes"/>
-    <mkdir  dir="${build.home}/tests"/>
-    <mkdir  dir="${build.home}/reports"/>
-    <mkdir  dir="${build.home}/lib"/>
-    <mkdir  dir="${build.home}/results"/>
-  </target>
-    
-  <target name="copy" depends="prepare"> 
-    <copy file="${lib.home}/hamcrest-core.jar" tofile="${build.home}/lib/hamcrest-core.jar"/>
-    <copy file="${lib.home}/junit.jar" tofile="${build.home}/lib/junit.jar"/>
-    <copy file="${lib.home}/libtw.jar" tofile="${build.home}/lib/libtw.jar"/>
-    <copy file="${lib.home}/cdk-1.4.19.jar" tofile="${build.home}/lib/cdk.jar"/>
-    <copy file="${lib.home}/json-simple-1.1.1.jar" tofile="${build.home}/lib/json.jar"/>
-    <copy file="${lib.home}/xerces.jar" tofile="${build.home}/lib/xerces.jar"/>
-  </target>
-  
-  
-  
-  <target name="compile" depends="copy">
-    <javac srcdir="${src.home}" destdir="${build.home}/classes" deprecation="true" includeAntRuntime="no">
-      <classpath refid="compile.classpath"/>
-    </javac>
-  </target>
-  
-  <target name="translateSmiles" depends="">
-    <java classname="main.PeptidesToCanonicalSmiles" failonerror="true" fork="true">
-      <arg value="${file}" />
-      <classpath>
-        <pathelement location="${build.home}/lib/cdk.jar"/>
-      	<pathelement location="${build.home}/lib/json.jar"/>
-      	<pathelement path="${jarfile}" />
-      </classpath>
-    </java>
-  </target>
-  
-  
-  <target name="computeResidues" depends="">
-    <java classname="main.CreateResidues" failonerror="true">
-      <arg value="${exec.monomers}" />
-      <arg value="${exec.rules}" />
-      <arg value="${exec.residues}" />
-      <arg value="-v" />
-      <classpath refid="exec.classpath"/>
-    </java>
-  </target>
-
-  <target name="computeChains" depends="">
-    <java classname="main.ChainsCreation" failonerror="true"
-      fork="true">
-      <jvmarg value="-Xmx4096m"/>
-      <arg value="${exec.monomers}" />
-      <arg value="${exec.peptides}" />
-      <arg value="${exec.rules}" />
-      <arg value="${exec.residues}" />
-      <arg value="${exec.chains}" />
-      <arg value="${exec.blocSize}" />
-      <arg value="-v" />
-      <classpath refid="exec.classpath"/>
-    </java>
-  </target>
-
-  <target name="atomic2Monomeric" depends="">
-    <java classname="main.AtomicToMonomeric" failonerror="true">
-      <arg value="${exec.monomers}" />
-      <arg value="${molecules}" />
-      <arg value="${exec.rules}" />
-      <arg value="${exec.residues}" />
-      <arg value="${exec.chains}" />
-      <arg value="${coverage}" />
-      <arg value="-v" />
-      <classpath refid="exec.classpath"/>
-    </java>
-  </target>
-
-  <target name="resultsToHTML" depends="">
-    <java classname="main.Json2HTML" failonerror="true">
-      <arg value="${exec.monomers}" />
-      <arg value="${molecules}" />
-      <arg value="${exec.rules}" />
-      <arg value="${exec.residues}" />
-      <arg value="${coverage}" />
-      <arg value="-html" />
-      <arg value="-v" />
-      <classpath>
-        <pathelement location="${build.home}/lib/cdk.jar"/>
-      	<pathelement location="${build.home}/lib/json.jar"/>
-        <pathelement path="${jarfile}" />
-      </classpath>
-    </java>
-  </target>
-	
-  <target name="resultsToZip" depends="">
-    <java classname="main.Json2HTML" failonerror="true">
-      <arg value="${exec.monomers}" />
-      <arg value="${molecules}" />
-      <arg value="${exec.rules}" />
-      <arg value="${exec.residues}" />
-      <arg value="${coverage}" />
-      <arg value="-zip" />
-      <arg value="${zipFile}" />
-      <arg value="-v" />
-      <classpath refid="exec.classpath"/>
-    </java>
-  </target>
-  
-  
-  
-  <target name="tests_compile" depends="" >
-    <javac srcdir="${tests.home}" destdir="${build.home}/tests" includeantruntime="false">
-      <classpath>
-      	<fileset dir="${build.home}/lib">
-      	  <include name="*.jar" />
-      	</fileset>
-	      <pathelement path="${build.home}/classes" />
-      </classpath>
-      <include name="**/*.java"/>
-    </javac>
-  </target>
-  
-  
-  <target name="tests" depends="compile, tests_compile" description="Run JUnits tests to verify program integrity">
-    <junit printsummary="true" haltonfailure="false">
-      <classpath>
-        <fileset dir="${build.home}/lib">
-          <include name="*.jar" />
-	      </fileset>
-	      <pathelement path="${build.home}/tests" />
-	      <pathelement path="${build.home}/classes" />
-      </classpath>
-      
-      <assertions><enable/></assertions>
-      
-      <formatter type="xml" usefile="true"/>
-      
-      <batchtest>
-	      <fileset dir="${build.home}/tests">
-	        <include name="**/*Test*" />
-      	</fileset>
-      </batchtest>
-    </junit>
-    
-    <move todir="${reports.home}">
-      <fileset dir="${basedir}">
-	      <include name="TEST-*.xml"/>
-      </fileset>
-    </move>
-  </target>
+	<path id="exec.classpath">
+		<fileset dir="${build.home}/lib">
+			<include name="*.jar"/>
+		</fileset>
+		<fileset dir="${build.home}">
+			<include name="s2m.jar"/>
+		</fileset>
+	</path>
 
 
-  <target name="create_jar" description="Create executble jar from sourcefiles">
-    <jar destfile="${build.home}/s2m.jar"
+
+	<target name="clean" description="Delete old build and dist directories">
+		<delete dir="${build.home}"/>
+	</target>
+
+
+
+	<target name="prepare" depends="clean">
+		<mkdir  dir="${build.home}"/>
+		<mkdir  dir="${build.home}/classes"/>
+		<mkdir  dir="${build.home}/tests"/>
+		<mkdir  dir="${build.home}/reports"/>
+		<mkdir  dir="${build.home}/lib"/>
+		<mkdir  dir="${exec.outfolder}"/>
+	</target>
+
+	<target name="copy" depends="prepare">
+		<copy file="${lib.home}/hamcrest-core.jar" tofile="${build.home}/lib/hamcrest-core.jar"/>
+		<copy file="${lib.home}/junit.jar" tofile="${build.home}/lib/junit.jar"/>
+		<copy file="${lib.home}/libtw.jar" tofile="${build.home}/lib/libtw.jar"/>
+		<copy file="${lib.home}/cdk-1.4.19.jar" tofile="${build.home}/lib/cdk.jar"/>
+		<copy file="${lib.home}/json-simple-1.1.1.jar" tofile="${build.home}/lib/json.jar"/>
+		<copy file="${lib.home}/xerces.jar" tofile="${build.home}/lib/xerces.jar"/>
+	</target>
+
+
+
+	<target name="compile" depends="copy">
+		<javac srcdir="${src.home}" destdir="${build.home}/classes" deprecation="true" includeAntRuntime="no">
+			<classpath refid="compile.classpath"/>
+		</javac>
+	</target>
+
+	<target name="translateSmiles" depends="">
+		<java classname="main.PeptidesToCanonicalSmiles" failonerror="true" fork="true">
+			<arg value="${file}" />
+			<classpath>
+				<pathelement location="${build.home}/lib/cdk.jar"/>
+				<pathelement location="${build.home}/lib/json.jar"/>
+				<pathelement path="${jarfile}" />
+			</classpath>
+		</java>
+	</target>
+
+
+	<target name="preCompute" depends="">
+		<java classname="main.PreComputation" failonerror="true">
+			<jvmarg value="-Xmx4G"/>
+			<arg value="-mono" />
+			<arg value="${exec.monomers}" />
+			<arg value="-rul" />
+			<arg value="${exec.rules}" />
+			<arg value="-res" />
+			<arg value="${exec.residues}" />
+			<arg value="-poly" />
+			<arg value="${exec.peptides}" />
+			<arg value="-cha" />
+			<arg value="${exec.chains}" />
+			<arg value="-markovian" />
+			<arg value="${exec.blocSize}" />
+			<!--arg value="-v" /-->
+			<classpath refid="exec.classpath"/>
+		</java>
+	</target>
+
+	<target name="s2m" depends="">
+		<java classname="main.ProcessPolymers" failonerror="true">
+			<arg value="-mono" />
+			<arg value="${exec.monomers}" />
+			<arg value="-rul" />
+			<arg value="${exec.rules}" />
+			<arg value="-res" />
+			<arg value="${exec.residues}" />
+			<arg value="-poly" />
+			<arg value="${exec.peptides}" />
+			<arg value="-cha" />
+			<arg value="${exec.chains}" />
+			<arg value="-html" />
+			<arg value="-outfolder" />
+			<arg value="${exec.outfolder}" />
+			<arg value="-v" />
+			<classpath refid="exec.classpath"/>
+		</java>
+	</target>
+
+	<target name="resultsToHTML" depends="">
+		<java classname="main.Json2HTML" failonerror="true">
+			<arg value="${exec.monomers}" />
+			<arg value="${molecules}" />
+			<arg value="${exec.rules}" />
+			<arg value="${exec.residues}" />
+			<arg value="${coverage}" />
+			<arg value="-html" />
+			<arg value="-v" />
+		</java>
+	</target>
+
+	<target name="resultsToZip" depends="">
+		<java classname="main.Json2HTML" failonerror="true">
+			<arg value="${exec.monomers}" />
+			<arg value="${molecules}" />
+			<arg value="${exec.rules}" />
+			<arg value="${exec.residues}" />
+			<arg value="${coverage}" />
+			<arg value="-zip" />
+			<arg value="${zipFile}" />
+			<arg value="-v" />
+			<classpath refid="exec.classpath"/>
+		</java>
+	</target>
+
+
+
+	<target name="tests_compile" depends="" >
+		<javac srcdir="${tests.home}" destdir="${build.home}/tests" includeantruntime="false">
+			<classpath>
+				<fileset dir="${build.home}/lib">
+					<include name="*.jar" />
+				</fileset>
+				<pathelement path="${build.home}/classes" />
+			</classpath>
+			<include name="**/*.java"/>
+		</javac>
+	</target>
+
+
+	<target name="tests" depends="compile, tests_compile" description="Run JUnits tests to verify program integrity">
+		<junit printsummary="true" haltonfailure="false">
+			<classpath>
+				<fileset dir="${build.home}/lib">
+					<include name="*.jar" />
+				</fileset>
+				<pathelement path="${build.home}/tests" />
+				<pathelement path="${build.home}/classes" />
+			</classpath>
+
+			<assertions>
+				<enable/>
+			</assertions>
+
+			<formatter type="xml" usefile="true"/>
+
+			<batchtest>
+				<fileset dir="${build.home}/tests">
+					<include name="**/*Test*" />
+				</fileset>
+			</batchtest>
+		</junit>
+
+		<move todir="${reports.home}">
+			<fileset dir="${basedir}">
+				<include name="TEST-*.xml"/>
+			</fileset>
+		</move>
+	</target>
+
+
+	<target name="create_jar" description="Create executble jar from sourcefiles">
+		<jar destfile="${build.home}/s2m.jar"
      basedir="${build.home}/classes"
      includes="**/*.class">
-    </jar>
-  </target>
+		</jar>
+	</target>
 
 </project>
 
