@@ -120,32 +120,6 @@
 		</java>
 	</target>
 
-	<target name="resultsToHTML" depends="">
-		<java classname="main.Json2HTML" failonerror="true">
-			<arg value="${exec.monomers}" />
-			<arg value="${molecules}" />
-			<arg value="${exec.rules}" />
-			<arg value="${exec.residues}" />
-			<arg value="${coverage}" />
-			<arg value="-html" />
-			<arg value="-v" />
-		</java>
-	</target>
-
-	<target name="resultsToZip" depends="">
-		<java classname="main.Json2HTML" failonerror="true">
-			<arg value="${exec.monomers}" />
-			<arg value="${molecules}" />
-			<arg value="${exec.rules}" />
-			<arg value="${exec.residues}" />
-			<arg value="${coverage}" />
-			<arg value="-zip" />
-			<arg value="${zipFile}" />
-			<arg value="-v" />
-			<classpath refid="exec.classpath"/>
-		</java>
-	</target>
-
 
 
 	<target name="tests_compile" depends="" >
