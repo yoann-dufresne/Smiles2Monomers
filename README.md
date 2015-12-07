@@ -24,7 +24,7 @@ Now you must find a binary file named s2m.jar into the build directory. The prog
 
 #### Pre-computation
 First of all you have to pre-compute all the monomers that you wish to use.  
-For the pre-computation you need one json file containing all the monomers that you want to use and one json file containing the polymers that you want to use for the indexation process and the file containing the biding rules (see the research article for more details). The json files structures are detailed in the wiki (work in progress). These json files are respectively named "data/monomers.json" and "data/learning.json". You can name your files in the same way or modify the properties in the beginning of the build.xml file.  
+For the pre-computation you need one json file containing all the monomers that you want to use and one json file containing the polymers that you want to use for the indexation process and the file containing the biding rules (see the research article for more details). The json files structures are [detailed in the wiki](https://github.com/yoann-dufresne/Smiles2Monomers/wiki/Json-formats). These json files are respectively named "data/monomers.json" and "data/learning.json". You can name your files in the same way or modify the properties in the beginning of the build.xml file.  
 Then you just have to call:  
 ant preCompute
 
