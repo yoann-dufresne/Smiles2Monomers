@@ -16,7 +16,7 @@ cd Smiles2Monomers
 ant compile  
 ant create_jar
 
-Now you must find a binary file named s2m.jar into the build directory. The program is ready.
+Now you sould find a binary file named s2m.jar in the build directory. The program is ready.
 
 ## How to use s2m
 
