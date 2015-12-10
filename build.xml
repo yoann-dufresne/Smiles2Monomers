@@ -9,7 +9,8 @@
 	<property name="reports.home" value="${build.home}/reports"/>
 
 	<property name="exec.monomers" value="data/monomers.json"/>
-	<property name="exec.peptides" value="data/peptides.json"/>
+	<property name="exec.learning" value="data/learning.json"/>
+	<property name="exec.polymers" value="data/juraj.json"/>
 	<property name="exec.rules" value="data/rules.json"/>
 	<property name="exec.residues" value="data/residues.json"/>
 	<property name="exec.chains" value="data/chains.json"/>
@@ -71,11 +72,7 @@
 	<target name="translateSmiles" depends="">
 		<java classname="main.PeptidesToCanonicalSmiles" failonerror="true" fork="true">
 			<arg value="${file}" />
-			<classpath>
-				<pathelement location="${build.home}/lib/cdk.jar"/>
-				<pathelement location="${build.home}/lib/json.jar"/>
-				<pathelement path="${jarfile}" />
-			</classpath>
+			<classpath refid="exec.classpath"/>
 		</java>
 	</target>
 
@@ -90,7 +87,7 @@
 			<arg value="-res" />
 			<arg value="${exec.residues}" />
 			<arg value="-poly" />
-			<arg value="${exec.peptides}" />
+			<arg value="${exec.learning}" />
 			<arg value="-cha" />
 			<arg value="${exec.chains}" />
 			<arg value="-markovian" />
@@ -109,7 +106,7 @@
 			<arg value="-res" />
 			<arg value="${exec.residues}" />
 			<arg value="-poly" />
-			<arg value="${exec.peptides}" />
+			<arg value="${exec.polymers}" />
 			<arg value="-cha" />
 			<arg value="${exec.chains}" />
 			<arg value="-html" />
