@@ -42,7 +42,7 @@ public class ChainsFamilyMatching implements FamilyMatcher {
 		if (this.co == null)
 			return null;
 		this.coverage = new Coverage(co);
-		FamilyChainsDB fc = this.chains.getObject(family.getName());
+		FamilyChainsDB fc = this.chains.getObject(family.getJsonName());
 		
 		this.toMatch.addAll(family.getRoots());
 		while (!toMatch.isEmpty()) {

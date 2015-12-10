@@ -75,9 +75,9 @@ public abstract class AbstractJsonLoader<B extends DB<T>, T> extends AbstractLoa
 	}
 	
 	@SuppressWarnings("unchecked")
-	public void saveFile(T[] covs, String filename) {
+	public void saveFile(T[] objs, String filename) {
 		JSONArray array = new JSONArray();
-		for (T obj : covs)
+		for (T obj : objs)
 			array.addAll(this.getArrayOfElements(obj));
 		
 		File f = new File(filename);

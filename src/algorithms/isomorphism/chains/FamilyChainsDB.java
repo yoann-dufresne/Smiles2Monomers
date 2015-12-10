@@ -62,7 +62,7 @@ public class FamilyChainsDB {
 		JSONObject jso = new JSONObject();
 		
 		// Id
-		jso.put("family", this.family.getName());
+		jso.put("family", this.family.getJsonName());
 		
 		// Roots
 		JSONObject roots = new JSONObject();

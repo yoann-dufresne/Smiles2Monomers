@@ -30,8 +30,8 @@ public class FamilyChainIO extends AbstractJsonLoader<ChainsDB, FamilyChainsDB> 
 	protected FamilyChainsDB objectFromJson(JSONObject jso) {
 		// FC creation
 		String famName = (String)jso.get("family");
-		if (famName.contains(","))
-			famName = famName.split(",")[0];
+		if (famName.contains("€"))
+			famName = famName.split("€")[0];
 		Family fam = this.families.getObject(famName);
 		FamilyChainsDB fc = new FamilyChainsDB(fam);
 		
@@ -83,7 +83,7 @@ public class FamilyChainIO extends AbstractJsonLoader<ChainsDB, FamilyChainsDB> 
 
 	@Override
 	protected String getObjectId(FamilyChainsDB fc) {
-		return fc.getFamily().getName();
+		return fc.getFamily().getJsonName();
 	}
 
 	@SuppressWarnings("unchecked")

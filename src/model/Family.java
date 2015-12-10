@@ -189,6 +189,20 @@ public class Family {
 		
 		return this.name;
 	}
+
+	public String getJsonName() {
+		String jsonName = null;
+		Collections.sort(this.monoNames);
+		
+		jsonName = "";
+		for (int i=0 ; i<this.monoNames.size() ; i++) {
+			if (i>0)
+				jsonName += '€';
+			jsonName += this.monoNames.get(i);
+		}
+		
+		return jsonName;
+	}
 	
 	public String getShortName() {
 		if (this.sortname == null) {
@@ -200,6 +214,10 @@ public class Family {
 		}
 		
 		return this.sortname;
+	}
+	
+	public List<String> getMonoNames() {
+		return monoNames;
 	}
 
 	public Monomer getPrincipalMonomer() {

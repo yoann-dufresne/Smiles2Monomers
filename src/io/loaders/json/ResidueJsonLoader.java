@@ -2,6 +2,7 @@ package io.loaders.json;
 
 import io.parsers.SmilesConverter;
 
+import java.util.Collections;
 import java.util.List;
 
 import model.Family;
@@ -61,7 +62,7 @@ public class ResidueJsonLoader extends AbstractJsonLoader<FamilyDB, Family> {
 		// Family construction
 		Family fam = new Family();
 		try {
-			for (String name : ((String)obj.get("family")).split(",")) {
+			for (String name : ((String)obj.get("family")).split("€")) {
 				Monomer m = this.monos.getObject(name);
 				fam.addMonomer(m);
 			}
@@ -99,7 +100,16 @@ public class ResidueJsonLoader extends AbstractJsonLoader<FamilyDB, Family> {
 			jso.put("name", res.getName());
 			jso.put("id", new Integer(res.getId()));
 			jso.put("mono", res.getMonoName());
-			jso.put("family", obj.getName());
+			
+			List<String> names = obj.getMonoNames();
+			Collections.sort(names);
+			String familyName = "";
+			for (int idx=0 ; idx<names.size() ; idx++) {
+				if (idx > 0)
+					familyName += '€';
+				familyName += names.get(idx);
+			}
+			jso.put("family", familyName);
 			
 			JSONArray links = new JSONArray();
 			String smiles = this.fillLinksJSO(links, res);
