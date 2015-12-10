@@ -16,7 +16,7 @@ Journal of Cheminformatics
 `ant compile`  
 `ant create_jar`
 
-Now you sould find a binary file named s2m.jar in the build directory. The program is ready.
+Now you should find a binary file named s2m.jar in the build directory. The program is ready.
 
 ## How to use s2m
 
