@@ -27,7 +27,7 @@ public class ProcessPolymers {
 	public static void main(String[] args) {
 		//----------------- Parameters ---------------------------
 		String monoDBname = "data/monomers.json";
-		String pepDBname = "data/peptides.json";
+		String pepDBname = "data/polymers.json";
 		String rulesDBname = "data/rules.json";
 		String residuesDBname = "data/residues.json";
 		String chainsDBFile = "data/chains.json";
@@ -178,6 +178,7 @@ public class ProcessPolymers {
 		
 		outputTime = System.currentTimeMillis() - outputTime;
 		System.out.println("Ouputing time : " + (outputTime/1000) + "s");
+		System.out.println("--- Ended ---");
 	}
 
 }
