@@ -38,6 +38,11 @@ public class PolymersJsonLoader extends AbstractJsonLoader<PolymersDB, Polymer> 
 		if ("".equals((String)obj.get("smiles"))) {
 			System.err.println("No smiles for " + ((String)obj.get("name")));
 			return null;
+		} else if (((String)obj.get("smiles")).contains(".")) {
+			System.err.println("The smiles for " + ((String)obj.get("name")) + " contains character '.'");
+			System.err.println("The '.' means that the smiles is composed of more than one molecule.");
+			System.err.println("Please split the smiles in two distinct smiles.");
+			return null;
 		}
 		
 		JSONArray verticies;
