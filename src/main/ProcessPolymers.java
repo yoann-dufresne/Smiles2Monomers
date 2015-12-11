@@ -33,7 +33,7 @@ public class ProcessPolymers {
 		String chainsDBFile = "data/chains.json";
 		
 		String outfile = "results/coverages.json";
-		String outfolder = "results/";
+		String outfolderName = "results/";
 		String imgsFoldername = "images/";
 		boolean html = false;
 		boolean zip = false;
@@ -73,7 +73,7 @@ public class ProcessPolymers {
 					outfile = args[idx+1];
 					break;
 				case "-outfolder":
-					outfolder = args[idx+1];
+					outfolderName = args[idx+1];
 					break;
 				case "-imgs":
 					imgsFoldername = args[idx+1];
@@ -147,6 +147,12 @@ public class ProcessPolymers {
 		//------------------- Output ------------------------
 		System.out.println("--- Output creations ---");
 		long outputTime = System.currentTimeMillis();
+		
+		// Creation of the out directory
+		File outfolder = new File(outfolderName);
+		if (!outfolder.exists())
+			outfolder.mkdir();
+		
 		CoveragesJsonLoader cjl = new CoveragesJsonLoader(polDB, families);
 		cjl.saveFile(covs, outfile);
 		
@@ -164,13 +170,13 @@ public class ProcessPolymers {
 			if (html) {
 				// HTML
 				Coverages2HTML c2h = new Coverages2HTML(covs, monoDB, families);
-				File htmlFile  = new File(outfolder + "/s2m.html");
+				File htmlFile  = new File(outfolderName + "/s2m.html");
 				c2h.createResults(htmlFile, imgsFolder, colors);
 			}
 			
 			if (zip) {
 				// Zip File
-				OutputZiper oz = new OutputZiper(outfolder + "/s2m.zip");
+				OutputZiper oz = new OutputZiper(outfolderName + "/s2m.zip");
 				oz.createZip(imgsFolder.getPath(), outfile, pepDBname, monoDBname, residuesDBname, colors);
 			}
 		}
