@@ -94,6 +94,7 @@ public class CoveragesJsonLoader extends
 		JSONObject obj = new JSONObject();
 		
 		obj.put("id", cov.getId());
+		//obj.put("pepId", cov.getChemicalObject())
 		obj.put("peptide", new Integer(cov.getChemicalObject().getId()));
 		obj.put("peptideName", cov.getChemicalObject().getName());
 		obj.put("matches", this.getJSONMatches(cov));
