@@ -141,6 +141,7 @@ public class CoveragesJsonLoader extends
 		MonomerGraph mg = cg.toMonomerGraph(families);
 		
 		JSONObject graph = new JSONObject();
+		// Monomers
 		JSONArray monos = new JSONArray();
 		for (Monomer mono : mg.nodes)
 			if (mono != null)
@@ -149,6 +150,16 @@ public class CoveragesJsonLoader extends
 				monos.add("?");
 		graph.put("monos", monos);
 		
+		// Residues (equivalent to monomers)
+		JSONArray residues = new JSONArray();
+		for (Residue res : mg.residues)
+			if (res != null)
+				residues.add(res.getId());
+			else
+				residues.add("?");
+		graph.put("residues", residues);
+		
+		// Links
 		JSONArray links = new JSONArray();
 		for (MonomerLinks ml : mg.links) {
 			JSONObject link = new JSONObject();

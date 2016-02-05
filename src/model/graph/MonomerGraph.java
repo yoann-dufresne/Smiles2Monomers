@@ -4,20 +4,24 @@ import java.util.ArrayList;
 import java.util.List;
 
 import model.Monomer;
-import algorithms.utils.Coverage;
+import model.Residue;
 
 public class MonomerGraph {
 
 	public Monomer[] nodes;
-	public List<MonomerLinks> links; 
+	public List<MonomerLinks> links;
+	public Residue[] residues; 
 	
-	public MonomerGraph(Monomer[] nodes) {
+	public MonomerGraph(Monomer[] nodes, Residue[] residues) {
 		this.nodes = nodes;
+		this.residues = residues;
 		this.links = new ArrayList<>();
 	}
 	
-	public MonomerGraph (Coverage cov) {
-		
+	public MonomerGraph(Monomer[] nodes) {
+		this.nodes = nodes;
+		this.residues = null;
+		this.links = new ArrayList<>();
 	}
 	
 	public void createLink (int mono1, int mono2) {

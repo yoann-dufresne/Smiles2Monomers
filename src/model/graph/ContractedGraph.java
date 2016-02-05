@@ -184,6 +184,7 @@ public class ContractedGraph extends SimpleGraph implements Cloneable {
 		// Transformation to a monomer graph
 		List<Vertex> verticiesOrder = new ArrayList<>();
 		List<Monomer> monos = new ArrayList<>();
+		List<Residue> residues = new ArrayList<>();
 		for (Object o : this.vertexSet()) {
 			Vertex v = (Vertex)o;
 			verticiesOrder.add(v);
@@ -196,14 +197,20 @@ public class ContractedGraph extends SimpleGraph implements Cloneable {
 					e.printStackTrace();
 				}
 				monos.add(fam.getPrincipalMonomer());
-			} else
+				residues.add(res);
+			} else {
 				monos.add(null);
+				residues.add(null);
+			}
 		}
 
 		Monomer[] array = new Monomer[monos.size()];
 		for (int i=0 ; i<monos.size() ; i++)
 			array[i] = monos.get(i);
-		MonomerGraph monoGraph = new MonomerGraph(array);
+		Residue[] resArray = new Residue[monos.size()];
+		for (int i=0 ; i<monos.size() ; i++)
+			resArray[i] = residues.get(i);
+		MonomerGraph monoGraph = new MonomerGraph(array, resArray);
 		
 		for (Object o : this.edgeSet()) {
 			UndirectedEdge e = (UndirectedEdge)o;

@@ -1,6 +1,4 @@
-package io.imgs;
-
-import io.imgs.coloration.ColoredAtomGenerator;
+package main;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -15,19 +13,26 @@ import java.util.List;
 
 import javax.imageio.ImageIO;
 
+import org.openscience.cdk.DefaultChemObjectBuilder;
+import org.openscience.cdk.Molecule;
+import org.openscience.cdk.exception.CDKException;
+import org.openscience.cdk.exception.InvalidSmilesException;
+import org.openscience.cdk.interfaces.IAtom;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.interfaces.IMolecule;
+import org.openscience.cdk.layout.StructureDiagramGenerator;
 import org.openscience.cdk.renderer.AtomContainerRenderer;
 import org.openscience.cdk.renderer.RendererModel;
 import org.openscience.cdk.renderer.font.AWTFontManager;
+import org.openscience.cdk.renderer.generators.BasicAtomGenerator;
 import org.openscience.cdk.renderer.generators.BasicBondGenerator;
 import org.openscience.cdk.renderer.generators.BasicSceneGenerator;
 import org.openscience.cdk.renderer.generators.IGenerator;
 import org.openscience.cdk.renderer.visitor.AWTDrawVisitor;
+import org.openscience.cdk.smiles.SmilesParser;
 
-
-public abstract class AbstractPictureGenerator {
-	
+public class PictureGenerator {
+		
 	protected static int SIZE = 1000;
 	
 	protected AtomContainerRenderer renderer;
@@ -35,36 +40,35 @@ public abstract class AbstractPictureGenerator {
 	protected IGenerator<IAtomContainer> atomGenerator;
 	protected BasicBondGenerator bbg;
 	protected BasicSceneGenerator bsg;
+
+	private SmilesParser sp;
 	
-	public AbstractPictureGenerator(IGenerator<IAtomContainer> atomGenerator) {
+	public PictureGenerator() {
 		// generators make the image elements
 		List<IGenerator<IAtomContainer>> generators = new ArrayList<IGenerator<IAtomContainer>>();
 		this.bsg = new BasicSceneGenerator();
 		generators.add(this.bsg);
 		this.bbg = new BasicBondGenerator();
 		generators.add(this.bbg);
-		this.atomGenerator = atomGenerator;
+		this.atomGenerator = new BasicAtomGenerator();
 		generators.add(this.atomGenerator);
 		
 		this.renderer = new AtomContainerRenderer(generators, new AWTFontManager());
 		this.model = renderer.getRenderer2DModel();
+		
+		// For smiles convertion
+		this.sp = new SmilesParser(DefaultChemObjectBuilder.getInstance());
+		this.sp.setPreservingAromaticity(true);
 	}
 
 	/**
 	 * Create a PNG picture of molecule with width and height sizes
-	 * @param molecule Molecule to be print
+	 * @param smiles SMILES of the molecule to be print
 	 * @param outfile Out file
+	 * @throws InvalidSmilesException 
 	 */
-	public void createPNG (IMolecule molecule, File outfile) {
-		/* Warning : This part of code change IAtoms coordinates
-		StructureDiagramGenerator sdg = new StructureDiagramGenerator();
-		sdg.setMolecule(molecule);
-		try {
-			sdg.generateCoordinates();
-			molecule = sdg.getMolecule();
-		} catch (CDKException e1) {
-			e1.printStackTrace();
-		}*/
+	public void createPNG (String smiles, File outfile) throws InvalidSmilesException {
+		IMolecule molecule = this.transform(smiles);
 		
 		// the draw area and the image should be the same size
 		Rectangle drawArea = new Rectangle(0, 0, SIZE, SIZE);
@@ -91,8 +95,8 @@ public abstract class AbstractPictureGenerator {
 		);
 		
 		// Drawing options
-		this.model.set(ColoredAtomGenerator.KekuleStructure.class, true);
-		this.model.set(ColoredAtomGenerator.ColorByType.class, true);
+		this.model.set(BasicAtomGenerator.KekuleStructure.class, true);
+		this.model.set(BasicAtomGenerator.ColorByType.class, true);
 		
 		// paint the background
 		Graphics2D g2 = (Graphics2D)image.getGraphics();
@@ -109,4 +113,29 @@ public abstract class AbstractPictureGenerator {
 		}
 	}/**/
 	
+	
+	public Molecule transform (String smiles) throws InvalidSmilesException {
+		Molecule imol = null;
+		imol = new Molecule(this.sp.parseSmiles(smiles));
+		
+		for (IAtom a : imol.atoms())
+			a.setImplicitHydrogenCount(0);
+		
+		StructureDiagramGenerator sdg = new StructureDiagramGenerator(imol);
+		try {
+			sdg.generateCoordinates();
+		} catch (CDKException e) {
+			System.err.println(smiles);
+			e.printStackTrace();
+		}
+		imol = new Molecule(sdg.getMolecule());
+		
+		return imol;
+	}
+	
+
+	public static void main(String[] args) throws InvalidSmilesException {
+		PictureGenerator pg = new PictureGenerator();
+		pg.createPNG("NCCCCCc1ccc(=O)cc1", new File("/tmp/imgTest.png"));
+	}
 }

@@ -22,7 +22,7 @@ public class PreComputation {
 		//----------------- Parameters ---------------------------
 		String rulesDBName = "data/rules.json";
 		String monosDBName = "data/monomers.json";
-		String jsonPolymers = "data/peptides.json";
+		String jsonPolymers = "data/learning.json";
 		
 		String serialFolder = "data/serials/";
 		String jsonResidues = "data/residues.json";
