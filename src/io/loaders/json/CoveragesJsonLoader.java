@@ -99,6 +99,7 @@ public class CoveragesJsonLoader extends
 		obj.put("peptideName", cov.getChemicalObject().getName());
 		obj.put("matches", this.getJSONMatches(cov));
 		obj.put("graph", this.getJSONGraph(cov));
+		obj.put("coverage", cov.getCoverageRatio());
 		
 		array.add(obj);
 		return array;
