@@ -1,10 +1,11 @@
 # Smiles2Monomers
 A tool to link chemical structures to biological structures
 
-Resear article (in press) :  
+Resear article :  
 "Smiles2Monomers : a link between chemical and biological structures for polymers"  
-Yoann Dufresne, Laurent Noé, Valérie Leclère and Maude Pupin  
-Journal of Cheminformatics
+Yoann Dufresne, Laurent Noé, Valérie Leclère and Maude Pupin
+http://www.ncbi.nlm.nih.gov/pubmed/26715946
+Journal of Cheminformatics, January 2016
 
 ## Overview
 
