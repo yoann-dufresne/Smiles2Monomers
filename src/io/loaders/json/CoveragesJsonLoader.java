@@ -2,6 +2,8 @@ package io.loaders.json;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.openscience.cdk.interfaces.IAtom;
+import org.openscience.cdk.interfaces.IBond;
 
 import algorithms.utils.Coverage;
 import algorithms.utils.Match;
@@ -97,8 +99,9 @@ public class CoveragesJsonLoader extends
 		//obj.put("pepId", cov.getChemicalObject())
 		obj.put("peptide", new Integer(cov.getChemicalObject().getId()));
 		obj.put("peptideName", cov.getChemicalObject().getName());
-		obj.put("matches", this.getJSONMatches(cov));
-		obj.put("graph", this.getJSONGraph(cov));
+		obj.put("atomic_graph", this.getJSONMatches(cov));
+		
+		obj.put("monomeric_graph", this.getJSONGraph(cov));
 		obj.put("coverage", cov.getCoverageRatio());
 		
 		array.add(obj);
@@ -106,34 +109,51 @@ public class CoveragesJsonLoader extends
 	}
 
 	@SuppressWarnings("unchecked")
-	private JSONArray getJSONMatches(Coverage cov) {
-		JSONArray resMatchs = new JSONArray();
+	private JSONObject getJSONMatches(Coverage cov) {
+		JSONObject graph = new JSONObject();
+		
+		JSONArray atoms = new JSONArray();
+		graph.put("atoms", atoms);
+		JSONArray bonds = new JSONArray();
+		graph.put("bonds", bonds);
+		
 		for (Match match : cov.getUsedMatches()) {
-			JSONObject value = new JSONObject();
-			
-			value.put("residue", new Integer(match.getResidue().getId()));
-			
-			JSONObject jMatch = new JSONObject();
-			
-			JSONArray atoms = new JSONArray();
+			// Atoms
 			for (int a : match.getAtoms()) {
 				JSONObject atom = new JSONObject();
-				atom.put("a", a);
-				atom.put("h", match.getHydrogensFrom(a));
+				// CDK informations
+				atom.put("cdk_idx", a);
+				// Atom informations
+				IAtom ia = cov.getChemicalObject().getMolecule().getAtom(a);
+				atom.put("name", ia.getSymbol());
+				atom.put("hdrogens", match.getHydrogensFrom(a));
+				// Residue informations
+				atom.put("res", match.getResidue().getId());
+				
 				atoms.add(atom);
 			}
-			jMatch.put("atoms", atoms);
 			
-			JSONArray bonds = new JSONArray();
-			for (int b : match.getBonds())
-				bonds.add(b);
-			jMatch.put("bonds", bonds);
-
-			value.put("match", jMatch);
-			resMatchs.add(value);
+			// Bonds
+			for (int b : match.getBonds()) {
+				IBond ib = cov.getChemicalObject().getMolecule().getBond(b);
+				JSONObject bond = new JSONObject();
+				
+				// CDK informations
+				bond.put("cdk_idx", b);
+				
+				// atoms linked
+				JSONArray linkedAtoms = new JSONArray();
+				for (IAtom a : ib.atoms()) {
+					linkedAtoms.add(cov.getChemicalObject().getMolecule().getAtomNumber(a));
+				}
+				bond.put("atoms", linkedAtoms);
+				bond.put("res", match.getResidue().getId());
+				
+				bonds.add(bond);
+			}
 		}
 		
-		return resMatchs;
+		return graph;
 	}
 	
 	@SuppressWarnings("unchecked")
