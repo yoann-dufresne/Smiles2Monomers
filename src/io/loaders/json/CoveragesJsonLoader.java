@@ -39,6 +39,9 @@ public class CoveragesJsonLoader extends
 
 	@Override
 	protected Coverage objectFromJson(JSONObject obj) {
+		// TODO : Create new parser with the files created by the new output functions
+		System.err.println("From classe '" + CoveragesJsonLoader.class.getName() + "' method 'objectFromJson':");
+		System.err.println("This is deprecated ! You will have some problems with recent json files !");
 		ChemicalObject co = null;
 		try {
 			co = this.db.getObject("" + ((Number)obj.get("peptide")).intValue());
@@ -126,7 +129,7 @@ public class CoveragesJsonLoader extends
 				// Atom informations
 				IAtom ia = cov.getChemicalObject().getMolecule().getAtom(a);
 				atom.put("name", ia.getSymbol());
-				atom.put("hdrogens", match.getHydrogensFrom(a));
+				atom.put("hydrogens", match.getHydrogensFrom(a));
 				// Residue informations
 				atom.put("res", match.getResidue().getId());
 				
