@@ -1,0 +1,7 @@
+build/
+data/
+images/
+results/
+.project
+.classpath
+**/*~
