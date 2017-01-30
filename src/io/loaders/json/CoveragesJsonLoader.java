@@ -146,6 +146,7 @@ public class CoveragesJsonLoader extends
 				for (IAtom a : ib.atoms()) {
 					linkedAtoms.add(cov.getChemicalObject().getMolecule().getAtomNumber(a));
 				}
+				bond.put("arity", ib.getOrder().numeric());
 				bond.put("atoms", linkedAtoms);
 				bond.put("res", match.getResidue().getId());
 				
