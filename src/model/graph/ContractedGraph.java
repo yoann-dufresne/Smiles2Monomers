@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
 
-import org._3pq.jgrapht.edge.UndirectedEdge;
 import org._3pq.jgrapht.graph.SimpleGraph;
 import org.openscience.cdk.interfaces.IAtom;
 import org.openscience.cdk.interfaces.IMolecule;
@@ -20,6 +19,7 @@ import model.Family;
 import model.Family.Link;
 import model.Monomer;
 import model.Residue;
+import model.Rule;
 
 @SuppressWarnings("serial")
 public class ContractedGraph extends SimpleGraph implements Cloneable {
@@ -53,6 +53,9 @@ public class ContractedGraph extends SimpleGraph implements Cloneable {
 			v.vertices.addAll(match.getAtoms());
 			for (int id : match.getAtoms()) {
 				this.verticiesOfatoms.put(id, v);
+				if (match.getExtLinks().containsKey(id)) {
+					v.kind.put(id, match.getExtLinks().get(id));
+				}
 			}
 			
 			this.addVertex(v);
@@ -91,11 +94,16 @@ public class ContractedGraph extends SimpleGraph implements Cloneable {
 					if (!v.vertices.contains(aIdx)) {
 						// Base edge
 						Vertex vOa = this.verticiesOfatoms.get(aIdx);
-						LabeledEdge edge = new LabeledEdge(v, vOa);
 						
+						String l0 = "";
+						String l1 = "";
 						// Labels
-						// TODO : Add kind of bond label.
+						if (v.kind.containsKey(idx))
+							l0 = v.kind.get(idx).getName();
+						if (vOa.kind.containsKey(aIdx))
+							l1 = vOa.kind.get(aIdx).getName();
 						
+						LabeledEdge edge = new LabeledEdge(v, vOa, l0, l1);
 						this.addEdge(edge);
 					}
 				}
@@ -144,13 +152,13 @@ public class ContractedGraph extends SimpleGraph implements Cloneable {
 						this.removeEdge(n, nn);
 						/*System.out.println(current.id + "\n" + nn.id);
 						System.out.println(current.vertices + "\n" + nn.vertices);*/
-						this.addEdge(new LabeledEdge(current, nn));
+						this.addEdge(new LabeledEdge(current, nn, "?", "?"));
 					}
 				}
 				for (Vertex nn : this.getNeighbors(old)) {
 					this.removeEdge(nn, old);
 					this.removeEdge(old, nn);
-					this.addEdge(new LabeledEdge(current, nn));
+					this.addEdge(new LabeledEdge(current, nn, "?", "?"));
 				}
 				
 				// Remove old vertices
@@ -213,11 +221,11 @@ public class ContractedGraph extends SimpleGraph implements Cloneable {
 		MonomerGraph monoGraph = new MonomerGraph(array, resArray);
 		
 		for (Object o : this.edgeSet()) {
-			UndirectedEdge e = (UndirectedEdge)o;
+			LabeledEdge e = (LabeledEdge)o;
 			int mono1 = verticiesOrder.indexOf((Vertex)e.getSource());
 			int mono2 = verticiesOrder.indexOf((Vertex)e.getTarget());
 			
-			monoGraph.createLink(mono1, mono2);
+			monoGraph.createLink(mono1, mono2, e.sourceLabel, e.targetLabel);
 		}
 		
 		return monoGraph;
@@ -235,10 +243,12 @@ public class ContractedGraph extends SimpleGraph implements Cloneable {
 		public Residue res;
 		public Set<Integer> vertices;
 		public final Map<Integer, Link> bonds;
+		public final Map<Integer, Rule> kind;
 		
 		public Vertex() {
 			this.vertices = new HashSet<>();
 			this.bonds = new HashMap<>();
+			this.kind = new HashMap<Integer, Rule>();
 		}
 		
 		@Override

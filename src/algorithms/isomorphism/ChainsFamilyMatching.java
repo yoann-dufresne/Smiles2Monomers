@@ -7,9 +7,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 
+import org.openscience.cdk.interfaces.IAtom;
+
 import model.ChemicalObject;
 import model.Family;
 import model.Residue;
+import model.Rule;
 import algorithms.isomorphism.chains.Chain;
 import algorithms.isomorphism.chains.ChainAdd;
 import algorithms.isomorphism.chains.ChainsDB;
@@ -72,7 +75,7 @@ public class ChainsFamilyMatching implements FamilyMatcher {
 			// Save results and recursive add
 			if (mcs.size() > 0) {
 				this.mappings.put(res, mcs);
-				this.addToCoverage (mcs, res);
+				this.addToCoverage (family, mcs, res);
 				
 				for (Residue child : fc.getFamily().getChildrenOf(res)) {
 					if (fc.getAdds(child).get(0).getFrom().equals(res)) {
@@ -86,12 +89,12 @@ public class ChainsFamilyMatching implements FamilyMatcher {
 		return this.coverage;
 	}
 
-	private void addToCoverage(List<MappedChain> mcs, Residue res) {
+	private void addToCoverage(Family family, List<MappedChain> mcs, Residue res) {
 		for (MappedChain mc : mcs)
-			this.addToCoverage(mc, res);
+			this.addToCoverage(family, mc, res);
 	}
 
-	private void addToCoverage(MappedChain mc, Residue res) {
+	private void addToCoverage(Family family, MappedChain mc, Residue res) {
 		Match match = new Match(res);
 		
 		match.addAtoms(mc.getAtomsMapping());
@@ -101,6 +104,31 @@ public class ChainsFamilyMatching implements FamilyMatcher {
 			match.addQuality(mc.getBondsMapping().get(idx), mc.getMatchings().get(idx));
 		}
 		
+		// Compute external bonds by aligning chain on residue
+		// 1- Retrieve the chain on root residue
+		int current = 200;
+		List<MappedChain> onResidue = null;
+		Residue rootMol = null;
+		for (Residue root : family.getRoots()) {
+			List<MappedChain> mcs = Isomorphism.searchAChain(mc.getChain(), root, MatchingType.EXACT);
+			if (mcs.size() > 0 && current > mcs.size()) {
+				current = mcs.size();
+				onResidue = mcs;
+				rootMol = root;
+			}
+		}
+		// 2- Look for atoms of interest
+		MappedChain resMapping = onResidue.get(0);
+		for (IAtom ia : rootMol.getAtomicLinks().keySet()) {
+			Rule r = rootMol.getAtomicLinks().get(ia);
+			
+			int resMolIdx = rootMol.getMolecule().getAtomNumber(ia);
+			int chainIdx = resMapping.getAtomsMapping().indexOf(resMolIdx);
+			
+			match.addExtLink(mc.getAtomsMapping().get(chainIdx), r);
+		}
+		
+		// Add the match
 		if (!this.coverage.getMatches().contains(match))
 			this.coverage.addMatch(match);
 	}

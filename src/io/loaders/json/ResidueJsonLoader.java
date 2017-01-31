@@ -54,7 +54,8 @@ public class ResidueJsonLoader extends AbstractJsonLoader<FamilyDB, Family> {
 			}
 			
 			int idx = ((Number)jso.get("atom")).intValue();
-			res.addIdxLink(idx, rule);
+			IAtom ia = res.getMolecule().getAtom(idx);
+			res.addLink(ia, rule);
 		}
 		
 		

@@ -297,6 +297,7 @@ public class Coverage implements Comparable<Coverage>, Cloneable {
 			this.notFound.put(name, nb+1);
 		}
 	}
+	
 
 	@Override
 	public int compareTo(Coverage c) {

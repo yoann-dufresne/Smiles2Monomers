@@ -219,6 +219,11 @@ public class CoveragesJsonLoader extends
 			idxs.add(ml.mono2);
 			link.put("idxs", idxs);
 			
+			JSONArray type = new JSONArray();
+			type.add(ml.label1);
+			type.add(ml.label2);
+			link.put("types", type);
+			
 			links.add(link);
 		}
 		graph.put("links", links);
