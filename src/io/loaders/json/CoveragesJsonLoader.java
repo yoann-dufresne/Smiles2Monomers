@@ -1,9 +1,13 @@
 package io.loaders.json;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.openscience.cdk.interfaces.IAtom;
 import org.openscience.cdk.interfaces.IBond;
+import org.openscience.cdk.interfaces.IMolecule;
 
 import algorithms.utils.Coverage;
 import algorithms.utils.Match;
@@ -120,6 +124,7 @@ public class CoveragesJsonLoader extends
 		JSONArray bonds = new JSONArray();
 		graph.put("bonds", bonds);
 		
+		Set<IBond> usedBonds = new HashSet<IBond>();
 		for (Match match : cov.getUsedMatches()) {
 			// Atoms
 			for (int a : match.getAtoms()) {
@@ -139,6 +144,7 @@ public class CoveragesJsonLoader extends
 			// Bonds
 			for (int b : match.getBonds()) {
 				IBond ib = cov.getChemicalObject().getMolecule().getBond(b);
+				usedBonds.add(ib);
 				JSONObject bond = new JSONObject();
 				
 				// CDK informations
@@ -152,6 +158,26 @@ public class CoveragesJsonLoader extends
 				bond.put("arity", ib.getOrder().numeric());
 				bond.put("atoms", linkedAtoms);
 				bond.put("res", match.getResidue().getId());
+				
+				bonds.add(bond);
+			}
+		}
+		
+		IMolecule mol = cov.getChemicalObject().getMolecule();
+		for (IBond ib : mol.bonds()) {
+			if (!usedBonds.contains(ib)) {
+				JSONObject bond = new JSONObject();
+				
+				// CDK informations
+				bond.put("cdk_idx", mol.getBondNumber(ib));
+				
+				// atoms linked
+				JSONArray linkedAtoms = new JSONArray();
+				for (IAtom a : ib.atoms()) {
+					linkedAtoms.add(mol.getAtomNumber(a));
+				}
+				bond.put("arity", ib.getOrder().numeric());
+				bond.put("atoms", linkedAtoms);
 				
 				bonds.add(bond);
 			}
