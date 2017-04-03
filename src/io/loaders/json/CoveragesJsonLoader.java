@@ -125,6 +125,7 @@ public class CoveragesJsonLoader extends
 		graph.put("bonds", bonds);
 		
 		Set<IBond> usedBonds = new HashSet<IBond>();
+		int matchId = 0;
 		for (Match match : cov.getUsedMatches()) {
 			// Atoms
 			for (int a : match.getAtoms()) {
@@ -137,6 +138,7 @@ public class CoveragesJsonLoader extends
 				atom.put("hydrogens", match.getHydrogensFrom(a));
 				// Residue informations
 				atom.put("res", match.getResidue().getId());
+				atom.put("matchIdx", matchId);
 				
 				atoms.add(atom);
 			}
@@ -161,6 +163,8 @@ public class CoveragesJsonLoader extends
 				
 				bonds.add(bond);
 			}
+			
+			matchId++;
 		}
 		
 		IMolecule mol = cov.getChemicalObject().getMolecule();
