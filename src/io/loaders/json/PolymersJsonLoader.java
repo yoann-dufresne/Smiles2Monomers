@@ -3,16 +3,15 @@ package io.loaders.json;
 import java.util.ArrayList;
 import java.util.List;
 
-import model.Monomer;
-import model.Polymer;
-import model.graph.MonomerGraph;
-import model.graph.MonomerGraph.MonomerLinks;
-
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import db.MonomersDB;
 import db.PolymersDB;
+import model.Monomer;
+import model.Polymer;
+import model.graph.MonomerGraph;
+import model.graph.MonomerGraph.MonomerLinks;
 
 public class PolymersJsonLoader extends AbstractJsonLoader<PolymersDB, Polymer> {
 
@@ -33,6 +32,7 @@ public class PolymersJsonLoader extends AbstractJsonLoader<PolymersDB, Polymer> 
 	}
 
 	
+	@SuppressWarnings("unchecked")
 	@Override
 	protected Polymer objectFromJson(JSONObject obj) {
 		if ("".equals((String)obj.get("smiles"))) {
@@ -45,17 +45,49 @@ public class PolymersJsonLoader extends AbstractJsonLoader<PolymersDB, Polymer> 
 			return null;
 		}
 		
+		// --- Parse the graph ---
 		JSONArray verticies;
 		JSONArray edges;
 		if (obj.containsKey("graph")) {
 			JSONObject graph = (JSONObject)obj.get("graph");
+			// Parse the s2m graph format
 			verticies = (JSONArray)graph.get("V");
 			edges = (JSONArray)graph.get("E");
+		} else if (obj.containsKey("structure")) {
+			verticies = new JSONArray();
+			edges = new JSONArray();
+			
+			// Parse the Norine graph format
+			String text = (String) ((JSONObject)obj.get("structure")).get("graph");
+			String[] split = text.split("@");
+			
+			// The verticies
+			verticies = new JSONArray();
+			for (String val : split[0].split(","))
+				verticies.add(val);
+			
+			// The edges
+			edges = new JSONArray();
+			for (int idx=1 ; idx<split.length ; idx++) {
+				String[] links = split[idx].split(",");
+				for (String val : links) {
+					int link_to = new Integer(val);
+					
+					if (idx-1 < link_to) {
+						JSONArray edge = new JSONArray();
+						edge.add(idx-1);
+						edge.add(link_to);
+						edges.add(edge);
+					}
+				}
+			}
 		} else {
 			verticies = new JSONArray();
 			edges = new JSONArray();
 		}
 		
+		
+		// --- Parse the monomer list ---
 		Monomer[] monomers = new Monomer[verticies.size()];
 		for (int i=0 ; i<monomers.length ; i++) {
 			String name = (String) verticies.get(i);
@@ -68,6 +100,7 @@ public class PolymersJsonLoader extends AbstractJsonLoader<PolymersDB, Polymer> 
 			}
 		}
 		
+		// Create the graph in memory
 		MonomerGraph g = new MonomerGraph(monomers);
 		for (Object o : edges) {
 			JSONArray link = (JSONArray)o;
