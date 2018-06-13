@@ -56,7 +56,6 @@ public abstract class DB<T> {
 	
 	public T getObject (String id) throws NullPointerException {
 		T obj = this.database.get(id);
-		
 		if (obj == null)
 			throw new NullPointerException(id + " not seems to be loaded");
 		return obj;

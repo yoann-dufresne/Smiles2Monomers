@@ -50,16 +50,18 @@ public class ResidueCreator {
 		
 		Residue.resetResidues();
 		
-		this.dbAlone = new RulesDB();
-		this.dbNotAlone = new RulesDB();
-		
-		for (Rule r : db.getObjects())
-		{
-			if (r.getAlone())
-				this.dbAlone.addObject(r.getName(), r);
-			else
-				this.dbNotAlone.addObject(r.getName(), r);
-		}
+		if (db!=null) {
+			this.dbAlone = new RulesDB();
+			this.dbNotAlone = new RulesDB();
+			
+			for (Rule r : db.getObjects())
+			{
+				if (r.getAlone())
+					this.dbAlone.addObject(r.getName(), r);
+				else
+					this.dbNotAlone.addObject(r.getName(), r);
+			}
+		}	
 	}
 
 	/**

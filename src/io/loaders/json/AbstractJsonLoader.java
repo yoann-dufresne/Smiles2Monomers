@@ -17,12 +17,12 @@ import io.loaders.AbstractLoader;
 public abstract class AbstractJsonLoader<B extends DB<T>, T> extends AbstractLoader<B, T> {
 	
 	public B loadFile (String filename) {
+		System.out.println(" - Loading "+filename);
 		File f = new File(filename);
 		if (!f.exists()) {
-			System.err.println("Impossible to load " + f.getPath());
+			System.err.println("Problem with file, impossible to load " + f.getPath());
 			System.exit(1);
 		}
-		
 		// BDD Creation
 		B db = this.createDB();
 		this.LoadFromString (db, filename);
@@ -31,6 +31,7 @@ public abstract class AbstractJsonLoader<B extends DB<T>, T> extends AbstractLoa
 	
 	@Override
 	protected void LoadFromString(B db, String filename) {
+
 		JSONArray array = null;
 		try {
 			array = (JSONArray) JSONValue.parse(new FileReader(new File(filename)));
@@ -40,8 +41,9 @@ public abstract class AbstractJsonLoader<B extends DB<T>, T> extends AbstractLoa
 		for (Object obj : array) {
 			JSONObject jso = (JSONObject) obj;
 			T tObj = this.objectFromFormat(jso);
-			if (tObj != null)
+			if (tObj != null) {
 				db.addObject(this.getObjectId(tObj), tObj);
+			}
 		}
 	}
 

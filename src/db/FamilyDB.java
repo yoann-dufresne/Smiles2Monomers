@@ -19,10 +19,24 @@ import org.openscience.cdk.exception.InvalidSmilesException;
 public class FamilyDB extends DB<Family> {
 
 	private Set<Family> uniqFamilies;
+	private List<Family> familiesList;
 	
+	public  void addToFamiliesList(Family family) {
+		familiesList.add(family);
+	}
+
+
+
+	public void setUniqFamilies(Set<Family> uniqFamilies) {
+		this.uniqFamilies = uniqFamilies;
+	}
+	
+	
+
 	public FamilyDB() {
 		super();
 		this.uniqFamilies = new HashSet<>();
+		this.familiesList = new ArrayList<>();
 	}
 
 	@Override
@@ -61,19 +75,28 @@ public class FamilyDB extends DB<Family> {
 	public Set<Family> getFamilies () {
 		return this.uniqFamilies;
 	}
+	
+	ResiduesDB resDB = new ResiduesDB();
 
 	public ResiduesDB getResidues() {
-		ResiduesDB resDB = new ResiduesDB();
 		
-		for (String name : this.database.keySet()) {
-			Family fam = this.database.get(name);
-			
-			for (Residue res : fam.getResidues())
-				resDB.addObject(res.getId(), res);
-		}
+		//afl
 		
+//		for (String name : this.database.keySet()) {
+//			Family fam = this.database.get(name);
+//			
+//			for (Residue res : fam.getResidues())
+//				resDB.addObject(res.getId(), res);
+//		}
+				
 		return resDB;
 	}
+	
+	public void setResiduesDB(ResiduesDB rdb) {
+		this.resDB = rdb;
+	}
+	
+	
 	
 	public boolean areInSameFamily (String mono1, String mono2) {
 		Family family1 = null;
@@ -118,7 +141,9 @@ public class FamilyDB extends DB<Family> {
 	@Override
 	public List<Family> getObjects () {
 		List<Family> objects = new ArrayList<>();
-		objects.addAll(this.uniqFamilies);
+		//afl
+//		objects.addAll(this.uniqFamilies);
+		objects.addAll(familiesList);
 		
 		return objects;
 	}

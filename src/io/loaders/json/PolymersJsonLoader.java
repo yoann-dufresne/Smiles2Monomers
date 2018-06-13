@@ -35,6 +35,7 @@ public class PolymersJsonLoader extends AbstractJsonLoader<PolymersDB, Polymer> 
 	
 	@Override
 	protected Polymer objectFromJson(JSONObject obj) {
+
 		if ("".equals((String)obj.get("smiles"))) {
 			System.err.println("No smiles for " + ((String)obj.get("name")));
 			return null;
@@ -91,7 +92,6 @@ public class PolymersJsonLoader extends AbstractJsonLoader<PolymersDB, Polymer> 
 		);
 		
 		pep.setGraph(g);
-		
 		return pep;
 	}
 

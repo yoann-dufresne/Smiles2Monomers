@@ -49,6 +49,13 @@ public class Residue extends AbstractChemicalObject implements Comparable<Residu
 		this.idxLinkedAtoms = new HashMap<>();
 	}
 	
+	public Residue(int id, String monoName, String smarts) {
+		this.smiles = smarts;
+		this.monoName = monoName;
+		this.name = this.monoName;
+		this.setIdx(id);
+	}
+
 	public static boolean existingResidue (String smarts, String monoName) {
 		if (Residue.residueDirectory.containsKey(smarts))
 			for (Residue r : Residue.residueDirectory.get(smarts))
@@ -76,6 +83,27 @@ public class Residue extends AbstractChemicalObject implements Comparable<Residu
 			Residue.residueDirectory.put(smarts, residues);
 		}
 		
+		return res;
+	}
+	
+	public static Residue constructResidue (int id, String monoName, String smarts) {
+		Residue res = null;
+		List<Residue> residues = null;
+		if (Residue.residueDirectory.containsKey(smarts)) {
+			residues = Residue.residueDirectory.get(smarts);
+			for (Residue r : residues)
+				if (r.getMonoName().equals(monoName))
+					res = r;
+		} else {
+			residues = new ArrayList<>();
+		}
+		
+		if (res == null) {
+			res = new Residue(id, monoName, smarts);
+			
+			residues.add(res);
+			Residue.residueDirectory.put(smarts, residues);
+		}
 		return res;
 	}
 	

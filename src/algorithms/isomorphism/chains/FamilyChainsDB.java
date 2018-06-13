@@ -30,6 +30,7 @@ public class FamilyChainsDB {
 			System.err.println("Residue " + root.getId() + " is not a root of the family " + this.family.getName());
 			return;
 		}
+//		System.out.println("add "+root + " " +chain);
 		this.rootChains.put(root, chain);
 	}
 	
@@ -66,8 +67,12 @@ public class FamilyChainsDB {
 		
 		// Roots
 		JSONObject roots = new JSONObject();
+		if (rootChains.size()==0) 
+			System.out.println("-----------------------> rootChains empty for family "+this.family.getJsonName());
 		for (Residue res : this.rootChains.keySet()) {
+//			System.out.println("add root id=" + res.getId() + ", serial="+this.rootChains.get(res).getSerial());
 			roots.put(res.getId(), this.rootChains.get(res).getSerial());
+						
 		}
 		jso.put("roots", roots);
 		

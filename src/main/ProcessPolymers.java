@@ -1,7 +1,13 @@
 package main;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.util.Map;
+
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
 
 import algorithms.MonomericSpliting;
 import algorithms.isomorphism.chains.ChainsDB;
@@ -9,6 +15,7 @@ import algorithms.utils.Coverage;
 import db.FamilyDB;
 import db.MonomersDB;
 import db.PolymersDB;
+import db.ResiduesDB;
 import db.RulesDB;
 import io.html.Coverages2HTML;
 import io.imgs.ImagesGeneration;
@@ -21,6 +28,9 @@ import io.loaders.json.ResidueJsonLoader;
 import io.loaders.json.RulesJsonLoader;
 import io.loaders.serialization.MonomersSerialization;
 import io.zip.OutputZiper;
+import model.Family;
+import model.Monomer;
+import model.Residue;
 
 public class ProcessPolymers {
 
@@ -116,12 +126,83 @@ public class ProcessPolymers {
 		boolean d2 = html || zip;
 		PolymersJsonLoader pjl = new PolymersJsonLoader(monoDB, d2);
 		PolymersDB polDB = pjl.loadFile(pepDBname);
-		
+
 		RulesDB rulesDB = RulesJsonLoader.loader.loadFile(rulesDBname);
 		
-		ResidueJsonLoader rjl = new ResidueJsonLoader(rulesDB, monoDB);
+		// afl
+		// chargement fichier residues.json généré
+//		ResidueJsonLoader rjl = new ResidueJsonLoader(rulesDB, monoDB);
+//		FamilyDB families = rjl.loadFile(residuesDBname); // Need optimizations
 		
-		FamilyDB families = rjl.loadFile(residuesDBname); // Need optimizations
+		FamilyDB families = new FamilyDB();
+		families.init(monoDB);
+		
+		System.out.println("--- Loading residues.json ---");
+		JSONArray residues;
+		try {
+			residues = (JSONArray) JSONValue.parse(new FileReader(new File(residuesDBname)));
+			
+			
+			families.init(monoDB);
+			
+			ResiduesDB residuesDB = new ResiduesDB();
+			
+			int unloaded = 0;
+			
+			// remplissage de familiesSet
+			for (int i=0; i< residues.size(); i++) {
+				JSONObject jsonObject = (JSONObject) residues.get(i);					
+				
+				
+				// creation objet Residue à partir de l'objet JSON
+				Residue residue = new Residue ((String)jsonObject.get("mono"),(String)jsonObject.get("smarts"),true);					
+				residue.setIdx(((Number)jsonObject.get("id")).intValue());
+
+				
+				// Family construction
+				Family family = new Family();
+				
+				try {
+					for (String name : ((String)jsonObject.get("family")).split("€")) {
+						Monomer m = monoDB.getObject(name.trim());
+						family.addMonomer(m);
+					}						
+					
+					
+				} catch (NullPointerException e) {
+					unloaded++;
+//					System.err.println("Unloaded residue " + residue.getMonoName());
+				}
+				
+				family.addResidue(residue);					
+				
+				for (Object jso : (JSONArray)jsonObject.get("depandances")) {
+					int idx = ((Number)jso).intValue();
+					family.addDependance(idx, new Integer(residue.getId()));
+				}
+
+				families.addToFamiliesList(family);					
+			}
+			
+			// set ResidueDB
+			// pour chaque family et chaque residue
+			for(Family fam : families.getObjects()) {					
+				for (Residue res : fam.getResidues()) {						
+					residuesDB.addObject(res.getId(), res);						
+				}					
+			}
+			
+	        families.setResiduesDB(residuesDB);
+			
+	    	System.out.println("monos : "+ monoDB.size());
+	        System.out.println("unloaded residues : " + unloaded);
+			
+			
+		} catch (FileNotFoundException e1) {
+			e1.printStackTrace();
+		}
+		// end afl
+		
 		FamilyChainIO fcio = new FamilyChainIO(families);
 		ChainsDB chains = fcio.loadFile(chainsDBFile);
 		
@@ -161,7 +242,6 @@ public class ProcessPolymers {
 			File imgsFolder = new File(imgsFoldername);
 			if (!imgsFolder.exists())
 				imgsFolder.mkdir();
-			
 			ImagesGeneration ig = new ImagesGeneration();
 			ig.generateMonomerImages(imgsFolder, monoDB);
 			

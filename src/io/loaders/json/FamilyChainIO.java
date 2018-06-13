@@ -22,8 +22,9 @@ public class FamilyChainIO extends AbstractJsonLoader<ChainsDB, FamilyChainsDB> 
 	private ResiduesDB residues;
 
 	public FamilyChainIO(FamilyDB families) {
-		this.families = families;
+		this.families = families;		
 		this.residues = this.families.getResidues();
+		System.out.println("families residues size = " + this.families.getResidues().size());
 	}
 	
 	@Override

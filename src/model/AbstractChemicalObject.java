@@ -31,6 +31,7 @@ public abstract class AbstractChemicalObject implements ChemicalObject, Serializ
 	}
 	
 	private Molecule getMol() {
+
 		if (this.mol == null) {
 			try {
 				boolean generateCoordinates = this.generateCoordinate == null ? false : this.generateCoordinate;

@@ -1,12 +1,23 @@
 package main;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
 
 import algorithms.ResidueCreator;
 import algorithms.isomorphism.chains.ChainLearning;
 import db.FamilyDB;
 import db.MonomersDB;
 import db.PolymersDB;
+import db.ResiduesDB;
 import db.RulesDB;
 import io.loaders.json.FamilyChainIO;
 import io.loaders.json.MonomersJsonLoader;
@@ -14,7 +25,10 @@ import io.loaders.json.PolymersJsonLoader;
 import io.loaders.json.ResidueJsonLoader;
 import io.loaders.json.RulesJsonLoader;
 import io.loaders.serialization.MonomersSerialization;
+import model.Family;
+import model.Monomer;
 import model.Residue;
+import model.Rule;
 
 public class PreComputation {
 
@@ -29,6 +43,7 @@ public class PreComputation {
 		String jsonChains = "data/chains.json";
 		
 		int markovianSize = 3;
+		boolean loadResidue = true;
 		
 		// Parsing
 		for (int idx=0 ; idx<args.length ; idx++) {
@@ -54,6 +69,9 @@ public class PreComputation {
 					break;
 				case "-markovian":
 					markovianSize = new Integer(args[idx+1]);
+					break;
+				case "-load_residues":
+					loadResidue = new Boolean(args[idx+1]);
 					break;
 
 				default:
@@ -109,22 +127,94 @@ public class PreComputation {
 		
 		//----------------- residues --------------------------
         
-        ResidueCreator rc = new ResidueCreator(rules);
-        rc.setVerbose(false);
+        FamilyDB families = null;
+        
+        if (!loadResidue) {
+	        ResidueCreator rc = new ResidueCreator(rules);
+	        rc.setVerbose(false);
+	
+	        System.out.println("--- Residues creation ---");
+	        families = rc.createResidues(monos);
+	
+	        System.out.println("--- Saving residues ---");
+	        ResidueJsonLoader rjl = new ResidueJsonLoader(rules, monos);
+	        rjl.saveFile(families, jsonResidues);    
+        } else {
+        	
+        	try {
+        		System.out.println("--- Loading residues.json ---");
+				JSONArray residues = (JSONArray) JSONValue.parse(new FileReader(new File(jsonResidues)));
+								
+				families = new FamilyDB();
+				families.init(monos);
+				
+				ResiduesDB residuesDB = new ResiduesDB();
+				
+				int unloaded = 0;
+				
+				// remplissage de familiesSet
+				for (int i=0; i< residues.size(); i++) {
+					JSONObject jsonObject = (JSONObject) residues.get(i);					
+					
+					
+					// creation objet Residue à partir de l'objet JSON
+					Residue residue = new Residue ((String)jsonObject.get("mono"),(String)jsonObject.get("smarts"),true);					
+					residue.setIdx(((Number)jsonObject.get("id")).intValue());
 
-        System.out.println("--- Residues creation ---");
-        FamilyDB families = rc.createResidues(monos);
+					
+					// Family construction
+					Family family = new Family();
+					
+					try {
+						for (String name : ((String)jsonObject.get("family")).split("€")) {
+							Monomer m = monos.getObject(name.trim());
+							family.addMonomer(m);
+						}						
+						
+					} catch (NullPointerException e) {
+						unloaded++;
+//						System.err.println("Unloaded residue " + residue.getMonoName());
+					}
+					
+					family.addResidue(residue);					
+					
+					for (Object jso : (JSONArray)jsonObject.get("depandances")) {
+						int idx = ((Number)jso).intValue();
+						family.addDependance(idx, new Integer(residue.getId()));
+					}
 
-        System.out.println("--- Saving residues ---");
-        ResidueJsonLoader rjl = new ResidueJsonLoader(rules, monos);
-        rjl.saveFile(families, jsonResidues);
+					families.addToFamiliesList(family);					
+				}
+				
+				// set ResidueDB
+				// pour chaque family et chaque residue
+				for(Family fam : families.getObjects()) {					
+					for (Residue res : fam.getResidues()) {						
+						residuesDB.addObject(res.getId(), res);						
+					}					
+				}
+				
+		        families.setResiduesDB(residuesDB);
+				
+	        	System.out.println("monos : "+ monos.size());
+	            System.out.println("unloaded residues : " + unloaded);
+				
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			}
+        	
+
+        }
 
 
         //----------------- chains ----------------------------
         System.out.println("--- Learning chains ---");
         // Adapt residue structures
-        for (Residue res : families.getResidues().getObjects())
+        
+        for (Residue res : families.getResidues().getObjects() ) {
         	res.explicitToImplicitHydrogens();
+        }
+        
         
         ChainLearning learning = new ChainLearning(learningBase);
         learning.setMarkovianSize(markovianSize);
@@ -136,6 +226,8 @@ public class PreComputation {
         fcio.saveFile(learning.getDb(), jsonChains);
         
         System.out.println("--- Ended ---");
+        
+        System.out.println(families.getResidues().size());
 	}
 
 }

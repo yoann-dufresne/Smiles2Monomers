@@ -73,7 +73,6 @@ public class ChainLearning {
 				roots.add(root);
 			}
 		}
-		
 		// --- Roots ---
 		// Init for size 1
 		ResidueMappings residueIndex_1 = new ResidueMappings();
@@ -91,6 +90,7 @@ public class ChainLearning {
 		for (Residue root : current.keySet()) {
 			MappedChain bestMarkov = this.getBest(current.get(root));
 			MappedChain greedyMB = this.learnGreedy(bestMarkov);
+			
 			this.chains.put(greedyMB.getChain().getSmiles(), greedyMB.getChain());
 			this.finalChains.put(greedyMB.getChemObject().getId(), greedyMB.getChain());
 		}
@@ -230,11 +230,12 @@ public class ChainLearning {
 		List<Integer> neighbors = mb.getNeighborsBonds(mol);
 		if (neighbors.size() == 0)
 			return mb;
-		
+
 		Extension ext = this.getBestGreedyExt (mol, neighbors);
 		MappedChain greedyMB = Isomorphism.searchFromPreviousMapping(mb, ext, MatchingType.EXACT).get(0);
 		
 		return this.learnGreedy(greedyMB);
+
 	}
 
 
@@ -260,6 +261,7 @@ public class ChainLearning {
 	// -------------------------------------- Children extensions -------------------------------------
 	
 	private void addAddsToSons(FamilyChainsDB fc, Family fam) {
+		System.out.println(fam.getRoots().size() + " roots for family " + fam.getName());
 		for (Residue root : fam.getRoots()) {
 			fc.addRootChain(root, this.finalChains.get(root.getId()));
 			Set<Residue> children = fam.getChildrenOf(root);

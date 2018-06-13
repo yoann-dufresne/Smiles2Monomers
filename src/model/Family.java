@@ -21,6 +21,10 @@ public class Family {
 	private String monoSMILES;
 
 	private String name;
+	public void setName(String name) {
+		this.name = name;
+	}
+
 	private String sortname;
 	
 	public Family() {
@@ -32,19 +36,19 @@ public class Family {
 	}
 	
 	public void addMonomer (Monomer mono) {
-		if (this.monomers.contains(mono))
+		if (this.monomers.contains(mono)) {
 			return;
-		
+		}
 		this.monomers.add(mono);
 		this.monoNames.add(mono.getName());
 		this.name = null;
-		
 		if ("".equals(this.monoSMILES))
 			try {
 				this.monoSMILES = SmilesConverter.conv.toCanonicalSmiles(mono.getSmiles());
 			} catch (InvalidSmilesException e) {
-				System.err.println("Impossible to parse " + this.getName() + "family");
+				System.err.println("Impossible to parse " + this.getName() + " family");
 			}
+//		System.out.println(this.monoNames + "("+this.monoNames.size()+")");
 	}
 	
 	public void addResidue (Residue res) {
@@ -186,7 +190,6 @@ public class Family {
 				this.name += this.monoNames.get(i);
 			}
 		}
-		
 		return this.name;
 	}
 
