@@ -17,15 +17,10 @@ public class MonomersJsonLoader extends AbstractJsonLoader<MonomersDB, Monomer> 
 
 	@Override
 	protected Monomer objectFromJson(JSONObject jso) {
-		// afl correction bug suite changement format monomers.json => id, name, smiles
-		//	String name = jso.containsKey("name") ? (String)jso.get("name") :
-		//		jso.containsKey("code") ? (String)jso.get("code") : null; 
-		//	String desc = jso.containsKey("desc") ? (String)jso.get("desc") :
-		//		jso.containsKey("code") ? (String)jso.get("code") : null;
-		String code = jso.containsKey("id") ? (String)jso.get("id") :
-			jso.containsKey("code") ? (String)jso.get("code") : null; 
 		String name = jso.containsKey("name") ? (String)jso.get("name") :
-			jso.containsKey("nameAA") ? (String)jso.get("nameAA") : null;
+			jso.containsKey("code") ? (String)jso.get("code") : null; 
+		String desc = jso.containsKey("desc") ? (String)jso.get("desc") :
+			jso.containsKey("code") ? (String)jso.get("code") : null;
 			
 		if ("".equals((String)jso.get("smiles"))) {
 			System.err.println("No smiles for " + ((String)jso.get("name")));
@@ -38,12 +33,13 @@ public class MonomersJsonLoader extends AbstractJsonLoader<MonomersDB, Monomer> 
 		}
 		
 		Monomer mono = new Monomer(
-				code,
 				name,
+				desc,
 				(String)jso.get("smiles")
 		);
 		if (mono.getMolecule().getAtomCount() < 2)
 			return null;
+		//System.out.println(mono);
 		return mono;
 	}
 
