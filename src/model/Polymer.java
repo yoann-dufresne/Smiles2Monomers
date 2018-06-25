@@ -35,12 +35,11 @@ public class Polymer extends AbstractChemicalObject {
 		this.id_peptide = id_peptide;
 		this.name = name;
 		this.monomers = monomers;
-		//System.out.println("smiles = " + smiles);
+
 		//afl: bug pour certains smiles lors de la canonisation du smiles, dans ce cas, on renvoie le smiles d'origine
 		try {
 			String canonicalSmiles = SmilesConverter.conv.toCanonicalSmiles(smiles);
 			this.smiles = (canonicalSmiles!="")? canonicalSmiles : smiles;
-			//System.out.println("canonical smiles = " + canonicalSmiles);
 		} catch (InvalidSmilesException e) {
 			e.printStackTrace();
 		}
