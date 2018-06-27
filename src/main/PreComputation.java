@@ -152,38 +152,31 @@ public class PreComputation {
 				
 				int unloaded = 0;
 				
+				String previousMono ="";
+				
+				// Family construction
+				Family family = new Family();
+				
+				
 				// remplissage de familiesSet
 				for (int i=0; i< residues.size(); i++) {
 					JSONObject jsonObject = (JSONObject) residues.get(i);					
 					
 					
-					// creation objet Residue à partir de l'objet JSON
-					Residue residue = new Residue ((String)jsonObject.get("mono"),(String)jsonObject.get("smarts"),true);					
-					residue.setIdx(((Number)jsonObject.get("id")).intValue());
-
 					
-					// Family construction
-					Family family = new Family();
-					
-					try {
-						for (String name : ((String)jsonObject.get("family")).split("€")) {
-							Monomer m = monos.getObject(name.trim());
-							family.addMonomer(m);
-						}						
+					if (!previousMono.equals((String)jsonObject.get("mono"))&&i!=0) {
 						
-					} catch (NullPointerException e) {
-						unloaded++;
-//						System.err.println("Unloaded residue " + residue.getMonoName());
-					}
+						families.addToFamiliesList(family);	
+						family = new Family();						
+												
+					} 
 					
-					family.addResidue(residue);					
+					previousMono = (String)jsonObject.get("mono");
 					
-					for (Object jso : (JSONArray)jsonObject.get("depandances")) {
-						int idx = ((Number)jso).intValue();
-						family.addDependance(idx, new Integer(residue.getId()));
-					}
+					go(family, jsonObject, monos);
+					
 
-					families.addToFamiliesList(family);					
+					
 				}
 				
 				// set ResidueDB
@@ -195,6 +188,10 @@ public class PreComputation {
 				}
 				
 		        families.setResiduesDB(residuesDB);
+		        
+		        System.out.println(" residuesdb size = "+families.getResidues().size());
+		        
+		        System.out.println("families size =" + families.size());
 				
 	        	System.out.println("monos : "+ monos.size());
 	            System.out.println("unloaded residues : " + unloaded);
@@ -228,6 +225,44 @@ public class PreComputation {
         System.out.println("--- Ended ---");
         
         System.out.println(families.getResidues().size());
+	}
+	
+	private static void go(Family family, JSONObject jsonObject, MonomersDB monos) {
+		
+		
+		// creation objet Residue à partir de l'objet JSON
+		Residue residue = new Residue ((String)jsonObject.get("mono"),(String)jsonObject.get("smarts"),true);					
+		residue.setIdx(((Number)jsonObject.get("id")).intValue());
+
+		
+		
+//		String f = (String)jsonObject.get("family");
+//		if (f.contains("€")) {
+//
+//			for (String name : ((String)jsonObject.get("family")).split("€")) {
+//				Monomer m = monos.getObject(name.trim());
+//				family.addMonomer(m);
+//			}						
+//		
+//		} else {
+//
+//			String name = (String)jsonObject.get("family");
+//			Monomer m = monos.getObject(name);
+//			family.addMonomer(m);
+////			System.err.println("Unloaded residue " + residue.getMonoName());
+//		}
+		
+		String name = (String)jsonObject.get("mono");
+		Monomer m = monos.getObject(name);
+		family.addMonomer(m);
+		
+		family.addResidue(residue);					
+		
+		for (Object jso : (JSONArray)jsonObject.get("depandances")) {
+			int idx = ((Number)jso).intValue();
+			family.addDependance(idx, new Integer(residue.getId()));
+		}
+		
 	}
 
 }

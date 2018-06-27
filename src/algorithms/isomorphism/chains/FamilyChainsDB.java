@@ -43,10 +43,12 @@ public class FamilyChainsDB {
 	
 	public List<ChainAdd> getAdds (Residue res) {
 		if (!this.adds.containsKey(res)) {
+			System.out.println("zzzzzzzz");
 			System.err.println("Family " + this.family.getName() + " do not contain residue " + res.getName());
 			return new ArrayList<>(1);
 		}
-		
+		System.out.println("add add");
+
 		return this.adds.get(res);
 	}
 	
@@ -68,7 +70,7 @@ public class FamilyChainsDB {
 		// Roots
 		JSONObject roots = new JSONObject();
 		if (rootChains.size()==0) 
-			System.out.println("-----------------------> rootChains empty for family "+this.family.getJsonName());
+//			System.out.println("-----------------------> rootChains empty for family "+this.family.getJsonName());
 		for (Residue res : this.rootChains.keySet()) {
 //			System.out.println("add root id=" + res.getId() + ", serial="+this.rootChains.get(res).getSerial());
 			roots.put(res.getId(), this.rootChains.get(res).getSerial());

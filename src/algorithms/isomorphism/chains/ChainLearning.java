@@ -328,6 +328,7 @@ public class ChainLearning {
 			Residue ancestor = null;
 			if (!this.finalChains.containsKey(from.getId())) {
 				List<ChainAdd> adds = fc.getAdds(from);
+				System.out.println(adds.size());
 				ancestor = adds.get(0).getFrom();
 			}
 			List<MappedChain> newMcs = this.calculateMapping(fc, from, ancestor, mc);
